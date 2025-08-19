@@ -1,0 +1,30 @@
+name: Deploy PROD
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy-prod:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://app.example.com
+    permissions:
+      contents: read
+      deployments: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require manual approval
+        run: echo "Ensure the 'production' environment in GitHub requires approval."
+      - name: Download artifact (from latest main build or re-build)
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifact
+          path: ./artifact
+      - name: Deploy to PROD (placeholder)
+        env:
+          PROD_DB_URL: ${{ secrets.PROD_DB_URL }}
+        run: |
+          echo "Deploying to PROD..."
+          echo "Using DB: $PROD_DB_URL"

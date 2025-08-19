@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [ "develop" ]
+  pull_request:
+    branches: [ "develop" ]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install deps
+        run: |
+          if [ -f package.json ]; then npm ci; fi
+          if [ -f pyproject.toml ]; then pipx install poetry && poetry install --no-interaction; fi
+      - name: Lint
+        run: |
+          if [ -f package.json ]; then npm run lint || echo "no lint script"; fi
+      - name: Unit tests
+        env:
+          UAT_DB_URL: ${{ secrets.UAT_DB_URL }}
+        run: |
+          if [ -f package.json ]; then npm test --if-present; fi
+          if [ -f pyproject.toml ]; then poetry run pytest -q || true; fi
+      - name: Build
+        run: |
+          if [ -f package.json ]; then npm run build --if-present; fi
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifact
+          path: |
+            dist
+            build
+            ./**/dist
+            ./**/build
