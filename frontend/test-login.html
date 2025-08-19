@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Test</title>
+</head>
+<body>
+    <h1>Login Flow Test</h1>
+    <div id="output"></div>
+    <button onclick="testLogin()">Test Login Flow</button>
+    
+    <script>
+        async function testLogin() {
+            const output = document.getElementById('output');
+            output.innerHTML = '<p>Testing login...</p>';
+            
+            try {
+                // Step 1: Login
+                const loginResponse = await fetch('http://127.0.0.1:8000/api/auth/login/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'amaysingh@outlook.com',
+                        password: 'amay@123'
+                    })
+                });
+                
+                const loginData = await loginResponse.json();
+                console.log('Login response:', loginData);
+                
+                if (loginData.token) {
+                    // Step 2: Store token
+                    localStorage.setItem('token', loginData.token);
+                    
+                    // Step 3: Test profile fetch
+                    const profileResponse = await fetch('http://127.0.0.1:8000/api/auth/profile/', {
+                        headers: {
+                            'Authorization': `Token ${loginData.token}`
+                        }
+                    });
+                    
+                    const profileData = await profileResponse.json();
+                    console.log('Profile response:', profileData);
+                    
+                    output.innerHTML = `
+                        <h2>Login Successful!</h2>
+                        <p><strong>Token:</strong> ${loginData.token}</p>
+                        <p><strong>User:</strong> ${JSON.stringify(loginData.user)}</p>
+                        <p><strong>Profile:</strong> ${JSON.stringify(profileData)}</p>
+                        <p><a href="http://localhost:3000/dashboard" target="_blank">Go to Dashboard</a></p>
+                        <button onclick="window.open('http://localhost:3000/debug', '_blank')">Open Debug Page</button>
+                    `;
+                } else {
+                    output.innerHTML = `<p>Login failed: ${JSON.stringify(loginData)}</p>`;
+                }
+            } catch (error) {
+                output.innerHTML = `<p>Error: ${error.message}</p>`;
+                console.error('Login test error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

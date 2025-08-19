@@ -1,0 +1,129 @@
+/* Collaboration Hub Styles - Guardian Agent Validated */
+.collaborationHub {
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.hubTabs {
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.tabButton {
+  padding: 10px 20px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.tabButton.active {
+  border-bottom-color: #007bff;
+  color: #007bff;
+  font-weight: 600;
+}
+
+.tabContent {
+  min-height: 400px;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+/* Invite Cards */
+.inviteCard {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 15px;
+  background: white;
+}
+
+.inviteHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.senderInfo h4 {
+  margin: 0 0 5px 0;
+  color: #333;
+}
+
+.senderCategory {
+  font-size: 12px;
+  color: #666;
+}
+
+.statusBadge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.statusBadge.pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.statusBadge.accepted {
+  background: #d4edda;
+  color: #155724;
+}
+
+.statusBadge.declined {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.matchExplanation,
+.projectDescription {
+  margin-bottom: 15px;
+}
+
+.matchExplanation strong,
+.projectDescription strong {
+  color: #333;
+}
+
+.inviteActions {
+  display: flex;
+  gap: 10px;
+}
+
+.acceptBtn,
+.declineBtn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.acceptBtn {
+  background: #28a745;
+  color: white;
+}
+
+.acceptBtn:hover {
+  background: #218838;
+}
+
+.declineBtn {
+  background: #dc3545;
+  color: white;
+}
+
+.declineBtn:hover {
+  background: #c82333;
+}
