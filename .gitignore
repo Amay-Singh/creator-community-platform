@@ -6,3 +6,13 @@ build/
 *.log
 __pycache__/
 .venv/
+
+# Protected files - do not commit
+agents/
+Standards/
+windsurf_full_update.patch
+SRS_Creator_Community_Platform.txt
+SpinUp_OnePrompt.md
+Prompt_Writer_Prompt.markdown
+Prompt_Orchestrator.md
+Agent_Prompts.json
