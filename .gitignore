@@ -4,6 +4,11 @@
 ../Standards/
 ../Agent_Prompts.json
 ../colab_requirement_docu.pdf
+../SpinUp_OnePrompt.md
+../Prompt_Orchestrator.md
+../SRS_Creator_Community_Platform.txt
+../windsurf_full_update.patch
+agents/
 
 # Python
 __pycache__/
