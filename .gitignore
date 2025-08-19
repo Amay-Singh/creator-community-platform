@@ -7,6 +7,17 @@ build/
 __pycache__/
 .venv/
 
+# Next.js build artifacts and development files
+frontend/.next/
+frontend/.next/**/*
+frontend/.next/cache/
+frontend/.next/server/
+frontend/.next/static/
+frontend/.next/build-manifest.json
+frontend/.next/trace
+*.hot-update.json
+*.hot-update.js
+
 # Protected files - do not commit
 agents/
 Standards/

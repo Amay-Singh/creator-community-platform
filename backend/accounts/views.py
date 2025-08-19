@@ -27,6 +27,7 @@ from .authentication import ProfileAuthenticationService
 from .search_service import ProfileSearchService
 from ai_services.models import ProfileFeedback as AIProfileFeedback
 from rest_framework.exceptions import ValidationError
+from notifications.utils import create_notification, create_activity
 
 class RegisterView(generics.CreateAPIView):
     """User registration view (REQ-18)"""
@@ -400,3 +401,36 @@ class PublicProfileDetailView(generics.RetrieveAPIView):
     serializer_class = PublicProfileSerializer
     permission_classes = [permissions.AllowAny]
     queryset = CreatorProfile.objects.filter(is_validated=True, user__is_active=True)
+    
+    def retrieve(self, request, *args, **kwargs):
+        response = super().retrieve(request, *args, **kwargs)
+        
+        # Create notification for profile owner when someone views their profile
+        if request.user.is_authenticated:
+            profile = self.get_object()
+            viewer = request.user
+            
+            # Don't notify if viewing own profile
+            if profile.user != viewer:
+                create_notification(
+                    user=profile.user,
+                    notification_type='profile_view',
+                    payload={
+                        'viewer_name': viewer.get_full_name() or viewer.username,
+                        'viewer_id': str(viewer.id),
+                        'profile_id': str(profile.id)
+                    }
+                )
+                
+                create_activity(
+                    user=profile.user,
+                    actor=viewer,
+                    action_type='profile_viewed',
+                    target_type='profile',
+                    target_id=str(profile.id),
+                    metadata={
+                        'viewer_name': viewer.get_full_name() or viewer.username
+                    }
+                )
+        
+        return response

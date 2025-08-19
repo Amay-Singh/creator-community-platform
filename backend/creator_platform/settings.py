@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'ai_services',
     'chat',
     'collaborations',
+    'notifications',
 ]
 
 MIDDLEWARE = [
