@@ -51,6 +51,7 @@ env/
 ENV/
 env.bak/
 venv.bak/
+.venv/
 
 # IDE
 .vscode/
@@ -117,7 +118,6 @@ stripe_*
 
 # Logs
 logs
-*.log
 
 # Runtime data
 pids

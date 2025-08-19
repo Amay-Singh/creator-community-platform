@@ -1,0 +1,31 @@
+name: Deploy UAT
+
+on:
+  push:
+    branches: [ "develop" ]
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
+
+jobs:
+  deploy-uat:
+    if: ${{ github.ref == 'refs/heads/develop' }}
+    runs-on: ubuntu-latest
+    environment: uat
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifact
+          path: ./artifact
+      - name: Deploy to UAT (placeholder)
+        env:
+          UAT_DB_URL: ${{ secrets.UAT_DB_URL }}
+        run: |
+          echo "Deploying to UAT..."
+          echo "Using DB: $UAT_DB_URL"
+          # TODO: Add your cloud CLI deploy here
+      - name: Output UAT URL
+        run: echo "UAT_URL=https://uat.example.com" >> $GITHUB_OUTPUT
