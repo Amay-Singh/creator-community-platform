@@ -3,7 +3,7 @@ Django settings for Creator Community Platform
 """
 import os
 from pathlib import Path
-from decouple import config
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -62,13 +62,29 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'creator_platform.wsgi.application'
 
-# Database - Supabase PostgreSQL configuration
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Database - Dynamic configuration (Supabase Postgres + SQLite fallback)
+DEFAULT_SQLITE = f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
+
+# Check if DATABASE_URL is set for Postgres, otherwise use SQLite
+database_url = config('DATABASE_URL', default=None)
+if database_url and 'postgres' in database_url:
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=database_url,
+            conn_max_age=0,
+            ssl_require=True
+        )
     }
-}
+    # Ensure SSL mode for Supabase connections
+    DATABASES['default'].setdefault('OPTIONS', {})['sslmode'] = 'require'
+else:
+    # Use SQLite for local development
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # Supabase Configuration
 SUPABASE_URL = 'https://qgdmsaxsizzlvkgochqd.supabase.co'

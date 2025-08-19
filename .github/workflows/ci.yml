@@ -42,10 +42,17 @@ jobs:
         run: |
           npm test --if-present || echo "No tests configured"
           
+      - name: Run Database Migrations
+        working-directory: ./backend
+        env:
+          DATABASE_URL: ${{ secrets.UAT_DB_URL }}
+        run: |
+          python manage.py migrate --noinput || true
+          
       - name: Test Backend
         working-directory: ./backend
         env:
-          UAT_DB_URL: ${{ secrets.UAT_DB_URL }}
+          DATABASE_URL: ${{ secrets.UAT_DB_URL }}
         run: |
           python manage.py test --verbosity=0 || echo "No tests configured"
           
