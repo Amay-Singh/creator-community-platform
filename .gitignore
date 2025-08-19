@@ -16,3 +16,7 @@ SpinUp_OnePrompt.md
 Prompt_Writer_Prompt.markdown
 Prompt_Orchestrator.md
 Agent_Prompts.json
+
+# Environment files
+backend/.env*
+frontend/.env*
