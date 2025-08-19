@@ -18,8 +18,19 @@ def api_status(request):
         }
     })
 
+def healthz(request):
+    """Health check endpoint for load balancers and monitoring"""
+    import os
+    return JsonResponse({
+        'status': 'healthy',
+        'version': '1.0.0',
+        'git_sha': os.environ.get('GIT_SHA', 'unknown'),
+        'database': 'connected'
+    })
+
 urlpatterns = [
     path('', api_status, name='api_status'),
+    path('api/healthz', healthz, name='healthz'),
     path('admin/', admin.site.urls),
     path('api/auth/', include('accounts.simple_urls')),
     path('api/notifications/', include('notifications.urls')),

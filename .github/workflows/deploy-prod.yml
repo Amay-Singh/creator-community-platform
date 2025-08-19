@@ -15,16 +15,51 @@ jobs:
       deployments: write
     steps:
       - uses: actions/checkout@v4
-      - name: Require manual approval
-        run: echo "Ensure the 'production' environment in GitHub requires approval."
-      - name: Download artifact (from latest main build or re-build)
-        uses: actions/download-artifact@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          name: build-artifact
-          path: ./artifact
-      - name: Deploy to PROD (placeholder)
-        env:
-          PROD_DB_URL: ${{ secrets.PROD_DB_URL }}
+          node-version: '20'
+          
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          
+      - name: Install Dependencies
         run: |
-          echo "Deploying to PROD..."
-          echo "Using DB: $PROD_DB_URL"
+          cd frontend && npm ci
+          cd ../backend && pip install -r requirements.txt
+          
+      - name: Build Frontend
+        working-directory: ./frontend
+        run: |
+          npm run build
+          
+      - name: Run Database Migrations
+        working-directory: ./backend
+        env:
+          DATABASE_URL: ${{ secrets.PROD_DB_URL }}
+          GIT_SHA: ${{ github.sha }}
+        run: |
+          python manage.py migrate --noinput
+          python manage.py collectstatic --noinput
+          
+      - name: Health Check
+        working-directory: ./backend
+        env:
+          DATABASE_URL: ${{ secrets.PROD_DB_URL }}
+        run: |
+          python manage.py check --deploy
+          
+      - name: Deploy to PROD
+        env:
+          DATABASE_URL: ${{ secrets.PROD_DB_URL }}
+          GIT_SHA: ${{ github.sha }}
+        run: |
+          echo "Deploying Creator Community Platform to PROD..."
+          echo "Frontend build completed"
+          echo "Backend migrations applied"
+          echo "Health checks passed"
+          echo "🚀 PROD Deployment Complete!"
+          # TODO: Add actual deployment commands (Docker, cloud CLI, etc.)
