@@ -23,41 +23,42 @@ jobs:
           python-version: '3.11'
           
       - name: Install Frontend Dependencies
-        working-directory: ./creator-platform/frontend
+        working-directory: ./frontend
         run: |
           npm ci
           
       - name: Install Backend Dependencies
-        working-directory: ./creator-platform/backend
+        working-directory: ./backend
         run: |
           pip install -r requirements.txt
           
       - name: Lint Frontend
-        working-directory: ./creator-platform/frontend
+        working-directory: ./frontend
         run: |
           npm run lint || echo "No lint script configured"
           
       - name: Test Frontend
-        working-directory: ./creator-platform/frontend
+        working-directory: ./frontend
         run: |
           npm test --if-present || echo "No tests configured"
           
       - name: Test Backend
-        working-directory: ./creator-platform/backend
+        working-directory: ./backend
         env:
           UAT_DB_URL: ${{ secrets.UAT_DB_URL }}
         run: |
           python manage.py test --verbosity=0 || echo "No tests configured"
           
       - name: Build Frontend
-        working-directory: ./creator-platform/frontend
+        working-directory: ./frontend
         run: |
           npm run build
           
       - name: Create Deployment Package
         run: |
           mkdir -p deployment-package
-          cp -r creator-platform/ deployment-package/
+          cp -r backend/ deployment-package/
+          cp -r frontend/ deployment-package/
           cp -r docs/ deployment-package/
           cp -r scripts/ deployment-package/
           cp .env.example deployment-package/

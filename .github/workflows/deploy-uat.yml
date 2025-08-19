@@ -35,13 +35,13 @@ jobs:
           python-version: '3.11'
           
       - name: Install Dependencies
-        working-directory: ./deployment/creator-platform
+        working-directory: ./deployment
         run: |
           cd frontend && npm ci
           cd ../backend && pip install -r requirements.txt
           
       - name: Run Database Migrations
-        working-directory: ./deployment/creator-platform/backend
+        working-directory: ./deployment/backend
         env:
           UAT_DB_URL: ${{ secrets.UAT_DB_URL }}
           DATABASE_URL: ${{ secrets.UAT_DB_URL }}
