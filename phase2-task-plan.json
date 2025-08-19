@@ -1,0 +1,60 @@
+{
+  "phase": "PHASE 2: Notifications + Activity Feed",
+  "goal": "Ship basic notifications system and personal activity feed (non-realtime initially)",
+  "requirements": {
+    "NOTIF-001": "Create notifications for key events: user_signed_in (throttled), profile_updated, message_received, profile_followed",
+    "NOTIF-002": "User can see unread count, list notifications, mark one/all as read",
+    "FEED-001": "Personal feed shows recent events involving user (actions and mentions)"
+  },
+  "performance_gates": {
+    "bundle_size": "<=75KB added gzipped JS",
+    "lcp": "LCP unchanged from current baseline",
+    "accessibility": "Keyboard support, focus-visible compliance"
+  },
+  "data_model": {
+    "notifications": {
+      "schema": "id UUID pk, user_id UUID fk->users, type TEXT, payload JSONB, read_at TIMESTAMPTZ NULL, created_at TIMESTAMPTZ DEFAULT now()",
+      "indexes": ["(user_id, read_at)", "(user_id, created_at DESC)"]
+    }
+  },
+  "ui_components": {
+    "NotificationBell": "Badge shows unread count, dropdown trigger",
+    "NotificationList": "Used in /notifications page and dropdown",
+    "FeedPage": "Event listing with type icons at /feed"
+  },
+  "api_endpoints": {
+    "GET /api/notifications": "Pagination, status filter (unread|all)",
+    "POST /api/notifications/mark-read": "Accept {ids:[...]} or {all:true}",
+    "GET /api/feed": "Paginated personal activity feed"
+  },
+  "observability": {
+    "events": ["notif_created", "notif_read", "feed_viewed"],
+    "metrics": ["notif_created_count", "notif_read_count"]
+  },
+  "testing_requirements": {
+    "unit": "Notification model & utility functions",
+    "integration": "All notification API endpoints",
+    "e2e": "Badge increments on new message, mark-all-read clears badge"
+  },
+  "acceptance_criteria": {
+    "ci_passes": true,
+    "uat_deploy_green": true,
+    "bundle_increase": "<75KB gzipped",
+    "accessibility_compliant": true
+  },
+  "agent_assignments": {
+    "CodeSync": "Django models, API views, React components",
+    "Polish_Verify": "Performance optimization, accessibility testing, code review",
+    "Guardian": "Schema validation, test coverage verification, gate compliance"
+  },
+  "deliverables": [
+    "Django migration for notifications table",
+    "Notification model with event triggers",
+    "NotificationBell, NotificationList, FeedPage components",
+    "API endpoints with serializers",
+    "Unit and integration tests",
+    "Playwright e2e tests",
+    "Observability logging",
+    "UAT deployment verification"
+  ]
+}

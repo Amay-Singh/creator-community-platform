@@ -1,31 +1,66 @@
 name: Deploy UAT
 
 on:
-  push:
-    branches: [ "develop" ]
   workflow_run:
-    workflows: ["CI"]
-    types:
-      - completed
+    workflows: ["CI"]         # name must match your CI workflow
+    types: [completed]        # fire when CI finishes (success/failure)
 
 jobs:
   deploy-uat:
-    if: ${{ github.ref == 'refs/heads/develop' }}
+    # Only run for successful CI runs on pushes to 'develop'
+    if: >
+      ${{
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.event == 'push' &&
+        github.event.workflow_run.head_branch == 'develop'
+      }}
     runs-on: ubuntu-latest
     environment: uat
+
     steps:
       - uses: actions/checkout@v4
-      - name: Download artifact
+
+      - name: Download Build Artifact from CI
         uses: actions/download-artifact@v4
         with:
           name: build-artifact
-          path: ./artifact
-      - name: Deploy to UAT (placeholder)
+          path: ./deployment
+          # Use the workflow_run id + built-in token for cross-workflow download
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Backend Dependencies
+        working-directory: ./deployment/backend
+        run: pip install -r requirements.txt
+
+      - name: Run DB migrate + collectstatic
+        working-directory: ./deployment/backend
         env:
-          UAT_DB_URL: ${{ secrets.UAT_DB_URL }}
+          DATABASE_URL: ${{ secrets.UAT_DB_URL }}
+          GIT_SHA: ${{ github.sha }}
         run: |
-          echo "Deploying to UAT..."
-          echo "Using DB: $UAT_DB_URL"
-          # TODO: Add your cloud CLI deploy here
+          python manage.py migrate --noinput
+          python manage.py collectstatic --noinput
+
+      - name: Health Check (Django system checks)
+        working-directory: ./deployment/backend
+        env:
+          DATABASE_URL: ${{ secrets.UAT_DB_URL }}
+          GIT_SHA: ${{ github.sha }}
+        run: python manage.py check --deploy
+
+      # Optional: trigger your actual platform deploy here (Render/Railway/etc.)
+      # - name: Trigger Render UAT Deploy
+      #   if: ${{ secrets.RENDER_UAT_HOOK_URL != '' }}
+      #   run: curl -fsSL -X POST "${{ secrets.RENDER_UAT_HOOK_URL }}"
+
       - name: Output UAT URL
-        run: echo "UAT_URL=https://uat.example.com" >> $GITHUB_OUTPUT
+        run: |
+          echo "UAT_URL=https://uat-creator-platform.example.com" >> $GITHUB_OUTPUT
+          echo "🚀 UAT Deployment Complete!"

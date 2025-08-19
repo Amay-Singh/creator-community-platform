@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1755577559741" clover="3.2.0">
+  <project timestamp="1755577559741" name="All files">
+    <metrics statements="123" coveredstatements="90" conditionals="70" coveredconditionals="37" methods="40" coveredmethods="20" elements="233" coveredelements="147" complexity="0" loc="123" ncloc="123" packages="3" files="6" classes="6"/>
+    <package name="Chat">
+      <metrics statements="44" coveredstatements="23" conditionals="26" coveredconditionals="3" methods="15" coveredmethods="4"/>
+      <file name="ChatInterface.js" path="/Users/amays/Desktop/Work/Colab/creator-platform/frontend/src/components/Chat/ChatInterface.js">
+        <metrics statements="44" coveredstatements="23" conditionals="26" coveredconditionals="3" methods="15" coveredmethods="4"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="2" count="1" type="stmt"/>
+        <line num="3" count="1" type="stmt"/>
+        <line num="4" count="1" type="stmt"/>
+        <line num="5" count="1" type="stmt"/>
+        <line num="6" count="1" type="stmt"/>
+        <line num="8" count="1" type="stmt"/>
+        <line num="9" count="11" type="stmt"/>
+        <line num="10" count="11" type="stmt"/>
+        <line num="11" count="11" type="stmt"/>
+        <line num="12" count="11" type="stmt"/>
+        <line num="13" count="11" type="stmt"/>
+        <line num="14" count="11" type="stmt"/>
+        <line num="17" count="11" type="stmt"/>
+        <line num="44" count="11" type="stmt"/>
+        <line num="45" count="11" type="stmt"/>
+        <line num="48" count="11" type="stmt"/>
+        <line num="49" count="11" type="stmt"/>
+        <line num="52" count="11" type="stmt"/>
+        <line num="53" count="11" type="stmt"/>
+        <line num="56" count="11" type="stmt"/>
+        <line num="57" count="0" type="stmt"/>
+        <line num="58" count="0" type="cond" truecount="0" falsecount="1"/>
+        <line num="60" count="0" type="stmt"/>
+        <line num="69" count="0" type="stmt"/>
+        <line num="70" count="0" type="stmt"/>
+        <line num="71" count="0" type="stmt"/>
+        <line num="73" count="0" type="stmt"/>
+        <line num="75" count="0" type="stmt"/>
+        <line num="76" count="0" type="stmt"/>
+        <line num="77" count="0" type="stmt"/>
+        <line num="78" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="84" count="0" type="stmt"/>
+        <line num="85" count="0" type="stmt"/>
+        <line num="86" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="92" count="0" type="stmt"/>
+        <line num="96" count="11" type="stmt"/>
+        <line num="97" count="0" type="stmt"/>
+        <line num="141" count="0" type="stmt"/>
+        <line num="201" count="0" type="stmt"/>
+        <line num="203" count="0" type="cond" truecount="0" falsecount="3"/>
+        <line num="204" count="0" type="stmt"/>
+        <line num="205" count="0" type="stmt"/>
+        <line num="252" count="11" type="stmt"/>
+      </file>
+    </package>
+    <package name="search">
+      <metrics statements="42" coveredstatements="32" conditionals="6" coveredconditionals="4" methods="18" coveredmethods="10"/>
+      <file name="SearchFilters.js" path="/Users/amays/Desktop/Work/Colab/creator-platform/frontend/src/components/search/SearchFilters.js">
+        <metrics statements="42" coveredstatements="32" conditionals="6" coveredconditionals="4" methods="18" coveredmethods="10"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="2" count="1" type="stmt"/>
+        <line num="3" count="1" type="stmt"/>
+        <line num="4" count="1" type="stmt"/>
+        <line num="5" count="1" type="stmt"/>
+        <line num="7" count="1" type="stmt"/>
+        <line num="8" count="13" type="stmt"/>
+        <line num="18" count="13" type="stmt"/>
+        <line num="23" count="13" type="stmt"/>
+        <line num="29" count="13" type="stmt"/>
+        <line num="34" count="13" type="stmt"/>
+        <line num="35" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="36" count="0" type="stmt"/>
+        <line num="39" count="1" type="stmt"/>
+        <line num="40" count="1" type="stmt"/>
+        <line num="41" count="1" type="stmt"/>
+        <line num="44" count="13" type="stmt"/>
+        <line num="45" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="46" count="0" type="stmt"/>
+        <line num="49" count="1" type="stmt"/>
+        <line num="50" count="1" type="stmt"/>
+        <line num="51" count="1" type="stmt"/>
+        <line num="54" count="13" type="stmt"/>
+        <line num="55" count="0" type="stmt"/>
+        <line num="56" count="0" type="stmt"/>
+        <line num="57" count="0" type="stmt"/>
+        <line num="60" count="13" type="stmt"/>
+        <line num="61" count="1" type="stmt"/>
+        <line num="69" count="1" type="stmt"/>
+        <line num="70" count="1" type="stmt"/>
+        <line num="75" count="1" type="stmt"/>
+        <line num="98" count="0" type="stmt"/>
+        <line num="109" count="130" type="stmt"/>
+        <line num="113" count="1" type="stmt"/>
+        <line num="130" count="0" type="stmt"/>
+        <line num="143" count="0" type="stmt"/>
+        <line num="161" count="39" type="stmt"/>
+        <line num="167" count="0" type="stmt"/>
+        <line num="185" count="117" type="stmt"/>
+        <line num="189" count="1" type="stmt"/>
+        <line num="207" count="0" type="stmt"/>
+        <line num="222" count="10" type="stmt"/>
+      </file>
+    </package>
+    <package name="ui">
+      <metrics statements="37" coveredstatements="35" conditionals="38" coveredconditionals="30" methods="7" coveredmethods="6"/>
+      <file name="Avatar.js" path="/Users/amays/Desktop/Work/Colab/creator-platform/frontend/src/components/ui/Avatar.js">
+        <metrics statements="12" coveredstatements="10" conditionals="10" coveredconditionals="4" methods="4" coveredmethods="3"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="2" count="1" type="stmt"/>
+        <line num="4" count="1" type="stmt"/>
+        <line num="12" count="11" type="stmt"/>
+        <line num="21" count="11" type="stmt"/>
+        <line num="27" count="11" type="stmt"/>
+        <line num="28" count="11" type="cond" truecount="0" falsecount="1"/>
+        <line num="29" count="11" type="stmt"/>
+        <line num="31" count="22" type="stmt"/>
+        <line num="52" count="0" type="stmt"/>
+        <line num="53" count="0" type="stmt"/>
+        <line num="69" count="11" type="stmt"/>
+      </file>
+      <file name="Button.js" path="/Users/amays/Desktop/Work/Colab/creator-platform/frontend/src/components/ui/Button.js">
+        <metrics statements="8" coveredstatements="8" conditionals="7" coveredconditionals="7" methods="1" coveredmethods="1"/>
+        <line num="1" count="3" type="stmt"/>
+        <line num="2" count="3" type="stmt"/>
+        <line num="4" count="3" type="stmt"/>
+        <line num="13" count="81" type="stmt"/>
+        <line num="19" count="81" type="stmt"/>
+        <line num="42" count="81" type="stmt"/>
+        <line num="87" count="3" type="stmt"/>
+        <line num="89" count="81" type="stmt"/>
+      </file>
+      <file name="Card.js" path="/Users/amays/Desktop/Work/Colab/creator-platform/frontend/src/components/ui/Card.js">
+        <metrics statements="8" coveredstatements="8" conditionals="5" coveredconditionals="3" methods="1" coveredmethods="1"/>
+        <line num="1" count="2" type="stmt"/>
+        <line num="2" count="2" type="stmt"/>
+        <line num="4" count="2" type="stmt"/>
+        <line num="12" count="13" type="stmt"/>
+        <line num="17" count="13" type="stmt"/>
+        <line num="26" count="13" type="stmt"/>
+        <line num="33" count="13" type="cond" truecount="1" falsecount="1"/>
+        <line num="50" count="13" type="stmt"/>
+      </file>
+      <file name="Input.js" path="/Users/amays/Desktop/Work/Colab/creator-platform/frontend/src/components/ui/Input.js">
+        <metrics statements="9" coveredstatements="9" conditionals="16" coveredconditionals="16" methods="1" coveredmethods="1"/>
+        <line num="1" count="3" type="stmt"/>
+        <line num="2" count="3" type="stmt"/>
+        <line num="4" count="3" type="stmt"/>
+        <line num="13" count="50" type="stmt"/>
+        <line num="20" count="50" type="stmt"/>
+        <line num="31" count="50" type="stmt"/>
+        <line num="37" count="50" type="cond" truecount="2" falsecount="0"/>
+        <line num="84" count="3" type="stmt"/>
+        <line num="86" count="50" type="stmt"/>
+      </file>
+    </package>
+  </project>
+</coverage>

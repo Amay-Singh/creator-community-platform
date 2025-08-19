@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { useAuth } from '../../contexts/AuthContext';
-import ChatInterface from '../../components/chat/ChatInterface';
+import ChatInterface from '../../components/Chat/ChatInterface';
 
 export default function ChatThread() {
   const router = useRouter();
