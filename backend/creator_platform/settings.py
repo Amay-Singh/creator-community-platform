@@ -61,20 +61,17 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'creator_platform.wsgi.application'
 
-# Database - New Neon PostgreSQL configuration
+# Database - Supabase PostgreSQL configuration
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'neondb',
-        'USER': 'neondb_owner',
-        'PASSWORD': 'npg_q3B5MwreHZKp',
-        'HOST': 'ep-soft-sound-adsy486j-pooler.c-2.us-east-1.aws.neon.tech',
-        'PORT': '5432',
-        'OPTIONS': {
-            'sslmode': 'require',
-        },
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# Supabase Configuration
+SUPABASE_URL = 'https://qgdmsaxsizzlvkgochqd.supabase.co'
+SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFnZG1zYXhzaXp6bHZrZ29jaHFkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1NzMxNzYsImV4cCI6MjA3MTE0OTE3Nn0.VuWYv1tyuxtPJdmJNuz5nq87iPot8-0pScjxf1JMpew'
 
 # Cache - simplified for demo
 CACHES = {

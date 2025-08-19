@@ -6,7 +6,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { useRouter } from 'next/router';
-import Login from '../../src/pages/login';
+import Login from '../../src/pages/auth/login';
 import { AuthProvider } from '../../src/contexts/AuthContext';
 
 // Mock Next.js router
@@ -40,9 +40,9 @@ describe('Login Page', () => {
     );
 
     expect(screen.getByText('Welcome Back')).toBeInTheDocument();
-    expect(screen.getByLabelText('Email:')).toBeInTheDocument();
-    expect(screen.getByLabelText('Password:')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Sign In' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Email')).toBeInTheDocument();
+    expect(screen.getByLabelText('Password')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
     expect(screen.getByText("Don't have an account?")).toBeInTheDocument();
   });
 

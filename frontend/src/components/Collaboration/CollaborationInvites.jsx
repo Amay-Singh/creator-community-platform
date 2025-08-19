@@ -71,6 +71,7 @@ const CollaborationInvites = () => {
               <div className="invite-header">
                 <div className="sender-info">
                   <h4>{invite.sender.display_name}</h4>
+                  Let's create something amazing together!
                   <span className="sender-category">
                     {invite.sender.category} • {invite.sender.experience_level}
                   </span>
