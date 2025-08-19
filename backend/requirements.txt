@@ -19,3 +19,4 @@ stripe==5.5.0
 gunicorn==21.2.0
 whitenoise==6.5.0
 coverage==7.4.1
+numpy==1.24.3

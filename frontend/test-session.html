@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Session Test</title>
+</head>
+<body>
+    <h1>Session Management Test</h1>
+    <div id="output"></div>
+    
+    <script>
+        // Set a valid token for testing
+        localStorage.setItem('token', '603bd7504ca70ad474eab6e18f6793003c13b5a6');
+        
+        // Test profile loading
+        fetch('http://127.0.0.1:8000/api/auth/profile/', {
+            headers: {
+                'Authorization': 'Token 603bd7504ca70ad474eab6e18f6793003c13b5a6'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('output').innerHTML = `
+                <h2>Profile Data:</h2>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+                <p><strong>Token stored:</strong> ${localStorage.getItem('token')}</p>
+                <p><a href="http://localhost:3000/dashboard">Go to Dashboard</a></p>
+            `;
+        })
+        .catch(error => {
+            document.getElementById('output').innerHTML = `<p>Error: ${error}</p>`;
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+/* AI Content Generator Styles - Guardian Agent Validated */
+.aiContentGenerator {
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.tabNavigation {
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.tabButton {
+  padding: 10px 20px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.tabButton.active {
+  border-bottom-color: #007bff;
+  color: #007bff;
+  font-weight: 600;
+}
+
+.generatorForm {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.formGroup label {
+  font-weight: 600;
+  color: #333;
+}
+
+.formGroup select,
+.formGroup input,
+.formGroup textarea {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.formGroup textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.generateButton {
+  padding: 12px 24px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.3s ease;
+}
+
+.generateButton:hover {
+  background: #0056b3;
+}
+
+.generateButton:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.generationResult {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  border-left: 4px solid #28a745;
+}
+
+.resultHeader {
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #28a745;
+}
+
+.loading {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
