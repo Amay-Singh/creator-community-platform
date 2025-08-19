@@ -3,8 +3,7 @@ name: Deploy UAT
 on:
   workflow_run:
     workflows: ["CI"]
-    types:
-      - completed
+    types: [completed]
     branches: [ "develop" ]
 
 jobs:
@@ -24,21 +23,14 @@ jobs:
           repository: ${{ github.repository }}
           run-id: ${{ github.event.workflow_run.id }}
           
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           
-      - name: Install Dependencies
-        working-directory: ./deployment
-        run: |
-          cd frontend && npm ci
-          cd ../backend && pip install -r requirements.txt
+      - name: Install Backend Dependencies
+        working-directory: ./deployment/backend
+        run: pip install -r requirements.txt
           
       - name: Run Database Migrations
         working-directory: ./deployment/backend
@@ -50,9 +42,10 @@ jobs:
           python manage.py collectstatic --noinput
           
       - name: Health Check
-        working-directory: ./backend
+        working-directory: ./deployment/backend
         env:
           DATABASE_URL: ${{ secrets.UAT_DB_URL }}
+          GIT_SHA: ${{ github.sha }}
         run: |
           python manage.py check --deploy
           
@@ -62,11 +55,11 @@ jobs:
           GIT_SHA: ${{ github.sha }}
         run: |
           echo "Deploying Creator Community Platform to UAT..."
-          echo "Frontend build completed"
+          echo "Frontend build (from artifact) present"
           echo "Backend migrations applied"
           echo "Health checks passed"
           echo "UAT deployment ready"
-          # TODO: Add actual deployment commands (Docker, cloud CLI, etc.)
+          # TODO: Add actual deployment commands (Docker, cloud CLI, Render/Railway hooks, etc.)
           
       - name: Output UAT URL
         run: |
