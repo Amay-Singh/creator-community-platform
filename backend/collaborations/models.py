@@ -1,8 +1,11 @@
 """
 Collaboration Models for Creator Community Platform
 Implements REQ-8, REQ-9, REQ-10: Collaboration invites, matching, and communication
+Includes P5-003 New Collaboration Invitation System models
 """
 from django.db import models
+from django.contrib.auth.models import User
+from django.conf import settings
 from accounts.models import CreatorProfile
 import uuid
 
@@ -193,3 +196,39 @@ class AICollaborationSuggestion(models.Model):
     
     def __str__(self):
         return f"Suggest {self.suggested_profile.display_name} to {self.profile.display_name}"
+
+
+# P5-003 New Collaboration Invitation System Models
+
+class Project(models.Model):
+    """
+    Project model for accepted collaboration invites
+    """
+    STATUS_CHOICES = [
+        ('planning', 'Planning'),
+        ('active', 'Active'),
+        ('on_hold', 'On Hold'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+    ]
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='owned_projects')
+    collaborators = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='collaborative_projects')
+    
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='planning')
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+    estimated_hours = models.PositiveIntegerField(null=True, blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'projects'
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.title} ({self.status})"
