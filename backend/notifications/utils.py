@@ -18,6 +18,10 @@ def create_notification(user, notification_type, payload=None):
         Notification instance or None if failed
     """
     try:
+        if not user:
+            logger.error(f"notif_create_error user_id=None type={notification_type} error=User is required")
+            return None
+            
         if payload is None:
             payload = {}
             
@@ -31,7 +35,8 @@ def create_notification(user, notification_type, payload=None):
         return notification
         
     except Exception as e:
-        logger.error(f"notif_create_error user_id={user.id} type={notification_type} error={str(e)}")
+        user_id = user.id if user else 'None'
+        logger.error(f"notif_create_error user_id={user_id} type={notification_type} error={str(e)}")
         return None
 
 

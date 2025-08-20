@@ -74,10 +74,13 @@ DATABASES = {
     "default": dj_database_url.config(
         default=DEFAULT_SQLITE,
         conn_max_age=0,     # good with pgBouncer; OK for SQLite too
-        ssl_require=True,   # required for Supabase; ignored by SQLite
+        ssl_require=False,  # Only enable for PostgreSQL
     )
 }
-if DATABASES["default"]["ENGINE"].endswith("postgresql"):
+
+# Only apply SSL settings for PostgreSQL connections
+if DATABASES["default"]["ENGINE"].endswith("postgresql") and os.environ.get("DATABASE_URL"):
+    DATABASES["default"]["ssl_require"] = True
     DATABASES["default"].setdefault("OPTIONS", {})["sslmode"] = "require"
 
 # --- Optional Supabase config (only if used by your code)
