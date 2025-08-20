@@ -2,68 +2,117 @@ name: CI
 
 on:
   push:
-    branches: [ "develop" ]
+    branches: ["develop"]
   pull_request:
-    branches: [ "develop" ]
+    branches: ["develop"]
 
 jobs:
   build-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          
-      - name: Install Frontend Dependencies
+
+      - name: Install Frontend Deps
         working-directory: ./frontend
         run: |
           npm ci || echo "no frontend"
-          
-      - name: Install Backend Dependencies
+
+      - name: Install Backend Deps
         working-directory: ./backend
-        run: |
-          pip install -r requirements.txt
-          
+        run: pip install -r requirements.txt
+
       - name: Lint Frontend
         working-directory: ./frontend
-        run: |
-          npm run lint || echo "No lint script configured"
-          
+        run: npm run lint || echo "no lint script"
+
       - name: Test Frontend
         working-directory: ./frontend
-        run: |
-          npm test --if-present || echo "No tests configured"
-          
+        run: npm test --if-present || echo "no fe tests"
+
       - name: Test Backend (SQLite)
         working-directory: ./backend
-        run: |
-          python manage.py test --verbosity=0 || echo "No tests configured"
-          
+        run: python manage.py test --verbosity=0 || echo "no be tests"
+
       - name: Build Frontend
         working-directory: ./frontend
-        run: |
-          npm run build || echo "skip build"
-          
+        run: npm run build || echo "skip build"
+
       - name: Create Deployment Package
         run: |
           mkdir -p deployment-package
-          cp -r backend/ deployment-package/backend/
+          cp -r backend/  deployment-package/backend/
           cp -r frontend/ deployment-package/frontend/ || true
-          cp -r docs/ deployment-package/docs/ || true
-          cp -r scripts/ deployment-package/scripts/ || true
+          cp -r docs/     deployment-package/docs/     || true
+          cp -r scripts/  deployment-package/scripts/  || true
           cp -f .env.example deployment-package/ 2>/dev/null || true
-          
+
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
           name: build-artifact
           path: deployment-package/
           retention-days: 1
+
+  deploy-uat:
+    # only run on pushes to develop (not pull_requests)
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
+    runs-on: ubuntu-latest
+    needs: build-test
+    environment: uat
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifact
+          path: ./deployment
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install backend deps
+        working-directory: ./deployment/backend
+        run: pip install -r requirements.txt
+
+      - name: Migrate + collectstatic
+        working-directory: ./deployment/backend
+        env:
+          DATABASE_URL: ${{ secrets.UAT_DB_URL }}
+          GIT_SHA: ${{ github.sha }}
+        run: |
+          python manage.py migrate --noinput
+          python manage.py collectstatic --noinput
+
+      - name: Health check
+        working-directory: ./deployment/backend
+        env:
+          DATABASE_URL: ${{ secrets.UAT_DB_URL }}
+          GIT_SHA: ${{ github.sha }}
+        run: python manage.py check --deploy
+
+      - name: Deploy to UAT (placeholder)
+        env:
+          DATABASE_URL: ${{ secrets.UAT_DB_URL }}
+          GIT_SHA: ${{ github.sha }}
+        run: |
+          echo "Deploying Creator Community Platform to UAT..."
+          echo "Backend migrations applied; static collected; health OK"
+          echo "Add your platform deploy command here (Render/Railway/Fly/etc)."
+
+      - name: Output UAT URL
+        run: |
+          echo "UAT_URL=https://uat-creator-platform.example.com" >> $GITHUB_OUTPUT
+          echo "🚀 UAT Deployment Complete!"
