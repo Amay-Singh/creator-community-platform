@@ -33,6 +33,7 @@ urlpatterns = [
     path('api/healthz', healthz, name='healthz'),
     path('admin/', admin.site.urls),
     path('api/auth/', include('accounts.simple_urls')),
+    path('api/accounts/', include('accounts.simple_urls')),
     path('api/notifications/', include('notifications.urls')),
     path('api/feed/', notification_views.activity_feed, name='activity-feed'),
 ]
