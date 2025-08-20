@@ -34,6 +34,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/auth/', include('accounts.simple_urls')),
     path('api/notifications/', include('notifications.urls')),
+    path('api/ai/', include('ai_services.urls')),
     path('api/feed/', notification_views.activity_feed, name='activity-feed'),
 ]
 

@@ -117,6 +117,75 @@ class AIMatchingAPIView(View):
                 'processing_time_ms': round((time.time() - start_time) * 1000, 2)
             }, status=500)
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def generate_suggestions(request):
+    """
+    Generate AI-powered collaboration suggestions
+    
+    POST /api/ai/match/suggestions/
+    Body: {
+        "intent": "collaboration",
+        "k": 20,
+        "diversity": 0.3,
+        "filters": {}
+    }
+    """
+    try:
+        matching_engine = MatchingEngine()
+        
+        # Parse request data
+        data = request.data
+        
+        # Validate required fields
+        intent = data.get('intent', 'collaboration')
+        if intent not in ['collaboration', 'networking', 'mentorship']:
+            return Response({
+                'error': 'Invalid intent. Must be: collaboration, networking, or mentorship'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Create matching request
+        matching_request = MatchingRequest(
+            user_id=str(request.user.id),
+            intent=intent,
+            k=min(data.get('k', 20), 50),  # Cap at 50
+            diversity=max(0.0, min(data.get('diversity', 0.3), 1.0)),  # 0-1 range
+            filters=data.get('filters', {}),
+            exclude_previous=data.get('exclude_previous', True)
+        )
+        
+        # Generate suggestions
+        candidates = matching_engine.generate_suggestions(matching_request)
+        
+        # Format response
+        response_data = {
+            'suggestions': [],
+            'metadata': {
+                'total_candidates': len(candidates),
+                'intent': intent,
+                'diversity_applied': matching_request.diversity,
+            }
+        }
+        
+        for candidate in candidates:
+            candidate_data = {
+                'user_id': str(candidate.user_id),
+                'profile_id': str(candidate.profile_id),
+                'score': round(candidate.score, 3),
+                'reasons': candidate.reasons,
+                'skills_overlap': candidate.skills_overlap,
+                'complementary_skills': candidate.complementary_skills[:5],  # Top 5
+            }
+            response_data['suggestions'].append(candidate_data)
+        
+        return Response(response_data, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        logger.error(f"Error generating suggestions: {str(e)}")
+        return Response({
+            'error': 'Failed to generate suggestions'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def explain_match(request, candidate_id):
@@ -149,7 +218,7 @@ def explain_match(request, candidate_id):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def record_match_feedback(request):
+def record_feedback(request):
     """
     Record user feedback on match quality
     
@@ -244,9 +313,9 @@ def get_matching_stats(request):
             'error': 'Failed to get matching statistics'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@api_view(['POST'])
+@api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
-def update_matching_preferences(request):
+def user_preferences(request):
     """
     Update user's matching preferences
     
@@ -305,66 +374,36 @@ def update_matching_preferences(request):
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def get_matching_preferences(request):
+def matching_health(request):
     """
-    Get user's matching preferences
+    Health check for matching service
     
-    GET /api/ai/match/preferences
+    GET /api/ai/match/health/
     """
     try:
-        user_id = str(request.user.id)
-        cache_key = f"match_prefs:{user_id}"
+        from accounts.models import CreatorProfile
         
-        preferences = cache.get(cache_key, {
-            'default_diversity': 0.3,
-            'preferred_intent': 'collaboration',
-            'max_distance_km': None,
-            'exclude_categories': [],
-            'boost_categories': []
-        })
+        # Basic health checks
+        total_profiles = CreatorProfile.objects.count()
         
-        return Response({
-            'preferences': preferences,
-            'user_id': user_id
-        })
+        # Test cache
+        cache_key = "match_health_test"
+        cache.set(cache_key, "ok", 60)
+        cache_test = cache.get(cache_key) == "ok"
         
-    except Exception as e:
-        logger.error(f"Error getting matching preferences: {str(e)}")
-        return Response({
-            'error': 'Failed to get preferences'
-        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-# Health check endpoint
-@api_view(['GET'])
-def matching_health_check(request):
-    """
-    Health check for AI matching service
-    
-    GET /api/ai/match/health
-    """
-    try:
-        # Test basic functionality
-        matching_engine = MatchingEngine()
-        
-        health_status = {
+        health_data = {
             'status': 'healthy',
-            'timestamp': time.time(),
-            'version': '1.0.0',
-            'components': {
-                'matching_engine': 'ok',
-                'vector_store': 'ok',
-                'bias_mitigation': 'ok',
-                'cache': 'ok' if cache.get('health_check') is not None or cache.set('health_check', 'ok', 60) is None else 'error'
-            }
+            'total_profiles': total_profiles,
+            'cache_working': cache_test,
+            'matching_engine': 'operational',
+            'timestamp': '2025-08-20T07:47:00Z'
         }
         
-        return Response(health_status)
+        return Response(health_data, status=status.HTTP_200_OK)
         
     except Exception as e:
-        logger.error(f"Health check failed: {str(e)}")
-        return Response({
-            'status': 'unhealthy',
-            'error': str(e),
-            'timestamp': time.time()
-        }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        logger.error(f"Matching health check failed: {str(e)}")
+        return Response(
+            {'status': 'unhealthy', 'error': str(e)},
+            status=status.HTTP_503_SERVICE_UNAVAILABLE
+        )

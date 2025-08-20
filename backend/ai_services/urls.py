@@ -3,35 +3,33 @@ URL patterns for ai_services app
 """
 from django.urls import path
 from . import views
-from .recommendation_api import (
-    AIMatchingAPIView, explain_match, record_match_feedback,
-    get_matching_stats, update_matching_preferences, 
-    get_matching_preferences, matching_health_check
-)
+from . import recommendation_api
+from . import search_api
 
 app_name = 'ai_services'
 
 urlpatterns = [
     # AI Content Validation
     path('validate/', views.validate_content, name='validate_content'),
-    path('validation/<uuid:validation_id>/', views.get_validation_result, name='get_validation_result'),
     
     # AI Content Generation
     path('generate/', views.generate_content, name='generate_content'),
-    path('generation/<uuid:generation_id>/', views.get_generation_result, name='get_generation_result'),
     
-    # Profile Feedback
-    path('feedback/', views.submit_feedback, name='submit_feedback'),
-    path('feedback/<uuid:profile_id>/', views.get_profile_feedback, name='get_profile_feedback'),
+    # AI Matching and Recommendations
+    path('match/suggestions/', recommendation_api.generate_suggestions, name='match_suggestions'),
+    path('match/explain/<str:candidate_id>/', recommendation_api.explain_match, name='explain_match'),
+    path('match/feedback/', recommendation_api.record_feedback, name='match_feedback'),
+    path('match/stats/', recommendation_api.get_matching_stats, name='match_stats'),
+    path('match/preferences/', recommendation_api.user_preferences, name='match_preferences'),
+    path('match/health/', recommendation_api.matching_health, name='match_health'),
     
-    # AI Matching & Recommendations
-    path('match/suggestions/', AIMatchingAPIView.as_view(), name='ai_match_suggestions'),
-    path('match/explain/<str:candidate_id>/', explain_match, name='explain_match'),
-    path('match/feedback/', record_match_feedback, name='match_feedback'),
-    path('match/stats/', get_matching_stats, name='matching_stats'),
-    path('match/preferences/', update_matching_preferences, name='update_preferences'),
-    path('match/preferences/', get_matching_preferences, name='get_preferences'),
-    path('match/health/', matching_health_check, name='matching_health'),
+    # Advanced Search and Talent Map
+    path('search/advanced/', search_api.advanced_search, name='advanced_search'),
+    path('search/talent-map/', search_api.talent_map, name='talent_map'),
+    path('search/suggestions/', search_api.search_suggestions, name='search_suggestions'),
+    path('search/filters/', search_api.search_filters, name='search_filters'),
+    path('search/health/', search_api.search_health, name='search_health'),
+    
     # Legacy endpoints
     path('legacy/generate/', views.AIContentGenerationView.as_view(), name='legacy_ai_content_generation'),
 ]
