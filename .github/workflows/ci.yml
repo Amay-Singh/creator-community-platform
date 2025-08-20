@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: ["develop"]
+    branches: ["develop", "uat"]
   pull_request:
     branches: ["develop"]
 
@@ -64,10 +64,10 @@ jobs:
           retention-days: 1
 
   deploy-uat:
-    # only run on pushes to develop (not pull_requests)
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
-    runs-on: ubuntu-latest
+    # ✅ Only deploy when the push is to the 'uat' branch (not on develop or PRs)
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/uat' }}
     needs: build-test
+    runs-on: ubuntu-latest
     environment: uat
     steps:
       - uses: actions/checkout@v4
@@ -91,6 +91,7 @@ jobs:
         working-directory: ./deployment/backend
         env:
           DATABASE_URL: ${{ secrets.UAT_DB_URL }}
+          SECRET_KEY: ${{ secrets.UAT_SECRET_KEY }}
           GIT_SHA: ${{ github.sha }}
         run: |
           python manage.py migrate --noinput
@@ -100,6 +101,7 @@ jobs:
         working-directory: ./deployment/backend
         env:
           DATABASE_URL: ${{ secrets.UAT_DB_URL }}
+          SECRET_KEY: ${{ secrets.UAT_SECRET_KEY }}
           GIT_SHA: ${{ github.sha }}
         run: python manage.py check --deploy
 
