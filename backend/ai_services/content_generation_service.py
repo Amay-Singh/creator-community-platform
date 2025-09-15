@@ -1,12 +1,23 @@
 """
 AI Content Generation Service
 Implements REQ-13, REQ-15: AI content generation and portfolio generator
+Enhanced for P5-006: AI Content Generation Assistant
 """
-import openai
+try:
+    import openai
+except ImportError:
+    openai = None
+import json
+from decimal import Decimal
 from django.conf import settings
 from django.utils import timezone
-from typing import Dict, List, Optional
-from .models import AIContentGeneration
+from django.db import transaction
+from django.db import models
+from typing import Dict, List, Optional, Tuple
+from .models import (
+    AIContentGeneration, ContentGenerationRequest, GeneratedContent,
+    ContentTemplate, UserUsageTracking
+)
 from accounts.models import CreatorProfile, PortfolioItem
 
 class AIContentGenerationService:
@@ -21,7 +32,10 @@ class AIContentGenerationService:
         """Lazy initialization of OpenAI client"""
         if self.client is None:
             try:
-                self.client = openai.OpenAI(api_key=getattr(settings, 'OPENAI_API_KEY', None))
+                if openai is None:
+                    self.client = None
+                else:
+                    self.client = openai.OpenAI(api_key=getattr(settings, 'OPENAI_API_KEY', None))
             except Exception:
                 self.client = None
         return self.client
@@ -423,6 +437,307 @@ class AIContentGenerationService:
         
         except AIContentGeneration.DoesNotExist:
             return self._fallback_response("Original generation not found")
+
+    # P5-006 Enhanced Content Generation Methods
+    
+    def create_content_request(self, user: CreatorProfile, request_data: Dict) -> ContentGenerationRequest:
+        """Create a new content generation request"""
+        with transaction.atomic():
+            request = ContentGenerationRequest.objects.create(
+                user=user,
+                content_type=request_data['content_type'],
+                platform=request_data.get('platform', 'general'),
+                prompt=request_data['prompt'],
+                topic=request_data['topic'],
+                target_audience=request_data.get('target_audience', ''),
+                tone=request_data.get('tone', ''),
+                word_count=request_data.get('word_count'),
+                duration_minutes=request_data.get('duration_minutes'),
+                temperature=request_data.get('temperature', 0.7),
+                max_tokens=request_data.get('max_tokens', 1000),
+                custom_parameters=request_data.get('custom_parameters', {})
+            )
+            
+            # Track usage
+            self._track_usage(user, 'content_generation')
+            
+            return request
+    
+    def process_content_request(self, request: ContentGenerationRequest) -> GeneratedContent:
+        """Process a content generation request using OpenAI"""
+        request.status = 'processing'
+        request.save()
+        
+        try:
+            # Generate content based on type
+            content_data = self._generate_content_by_type(request)
+            
+            # Create generated content record
+            generated_content = GeneratedContent.objects.create(
+                request=request,
+                content=content_data['content'],
+                title=content_data.get('title', ''),
+                metadata=content_data.get('metadata', {}),
+                quality_score=content_data.get('quality_score', 0.0)
+            )
+            
+            # Update request status
+            request.status = 'completed'
+            request.tokens_used = content_data.get('tokens_used', 0)
+            request.cost_estimate = content_data.get('cost_estimate', Decimal('0.00'))
+            request.completed_at = timezone.now()
+            request.save()
+            
+            # Track token usage
+            self._track_token_usage(request.user, request.tokens_used, request.cost_estimate)
+            
+            return generated_content
+            
+        except Exception as e:
+            request.status = 'failed'
+            request.save()
+            raise e
+    
+    def _generate_content_by_type(self, request: ContentGenerationRequest) -> Dict:
+        """Generate content based on content type"""
+        client = self._get_client()
+        if not client:
+            raise Exception("OpenAI client not available")
+        
+        # Build prompt based on content type
+        system_prompt, user_prompt = self._build_prompts(request)
+        
+        try:
+            response = client.chat.completions.create(
+                model="gpt-4-turbo-preview",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                temperature=request.temperature,
+                max_tokens=request.max_tokens
+            )
+            
+            content = response.choices[0].message.content.strip()
+            tokens_used = response.usage.total_tokens if hasattr(response, 'usage') else 0
+            cost_estimate = self._calculate_cost(tokens_used)
+            
+            # Extract title if possible
+            title = self._extract_title(content, request.content_type)
+            
+            return {
+                'content': content,
+                'title': title,
+                'quality_score': self._calculate_quality_score(content),
+                'tokens_used': tokens_used,
+                'cost_estimate': cost_estimate,
+                'metadata': {
+                    'model': 'gpt-4-turbo-preview',
+                    'temperature': request.temperature,
+                    'max_tokens': request.max_tokens
+                }
+            }
+            
+        except Exception as e:
+            raise Exception(f"Content generation failed: {str(e)}")
+    
+    def _build_prompts(self, request: ContentGenerationRequest) -> Tuple[str, str]:
+        """Build system and user prompts based on content type"""
+        
+        # Content type specific system prompts
+        system_prompts = {
+            'social_media_post': "You are a social media expert who creates engaging, viral-worthy posts that drive engagement and build community.",
+            'video_script': "You are a professional video scriptwriter who creates compelling, well-structured scripts for various video formats.",
+            'blog_post': "You are a skilled blog writer who creates informative, engaging, and SEO-friendly blog content.",
+            'marketing_copy': "You are a marketing copywriter who creates persuasive, conversion-focused copy that drives action.",
+            'creative_writing': "You are a creative writer who crafts imaginative, compelling narratives and stories.",
+            'product_description': "You are a product copywriter who creates compelling, benefit-focused product descriptions that sell.",
+            'email_campaign': "You are an email marketing specialist who creates engaging, personalized email content that converts.",
+            'press_release': "You are a PR professional who writes newsworthy, professional press releases that get media attention."
+        }
+        
+        system_prompt = system_prompts.get(request.content_type, "You are a professional content writer.")
+        
+        # Build comprehensive user prompt
+        user_prompt = f"""
+        Create {request.content_type} content with the following specifications:
+
+        Topic: {request.topic}
+        Platform: {request.platform}
+        Target Audience: {request.target_audience or 'General audience'}
+        Tone: {request.tone or 'Professional but engaging'}
+        
+        User Request: {request.prompt}
+        """
+        
+        if request.word_count:
+            user_prompt += f"\nTarget Word Count: {request.word_count} words"
+        
+        if request.duration_minutes:
+            user_prompt += f"\nTarget Duration: {request.duration_minutes} minutes"
+        
+        # Add platform-specific guidelines
+        if request.platform != 'general':
+            platform_guidelines = self._get_platform_guidelines(request.platform)
+            user_prompt += f"\n\nPlatform Guidelines: {platform_guidelines}"
+        
+        # Add custom parameters
+        if request.custom_parameters:
+            user_prompt += f"\n\nAdditional Requirements: {json.dumps(request.custom_parameters, indent=2)}"
+        
+        user_prompt += "\n\nPlease create high-quality, original content that meets these specifications."
+        
+        return system_prompt, user_prompt
+    
+    def _get_platform_guidelines(self, platform: str) -> str:
+        """Get platform-specific content guidelines"""
+        guidelines = {
+            'instagram': "Keep it visual-first, use relevant hashtags, engage with stories, optimal length 125-150 characters for captions",
+            'tiktok': "Focus on trends, use popular sounds, keep it short and engaging, vertical video format, hook viewers in first 3 seconds",
+            'youtube': "Strong hook in first 15 seconds, clear value proposition, encourage engagement, optimize for search",
+            'twitter': "Keep under 280 characters, use relevant hashtags, encourage retweets, be conversational",
+            'linkedin': "Professional tone, industry insights, thought leadership, longer form content acceptable",
+            'facebook': "Community-focused, encourage comments and shares, mix of text and visual content"
+        }
+        return guidelines.get(platform, "Follow platform best practices")
+    
+    def _extract_title(self, content: str, content_type: str) -> str:
+        """Extract or generate title from content"""
+        lines = content.split('\n')
+        
+        # Look for title patterns in first few lines
+        for line in lines[:3]:
+            line = line.strip()
+            # Check for markdown headers
+            if line.startswith('#'):
+                return line.replace('#', '').strip()
+            # Check for short uppercase lines (likely titles)
+            if line.isupper() and 10 <= len(line) <= 100:
+                return line
+            # Check for short lines that could be titles
+            if 10 <= len(line) <= 80 and not line.endswith('.'):
+                return line
+        
+        # Generate generic title based on content type
+        type_titles = {
+            'social_media_post': 'Social Media Post',
+            'video_script': 'Video Script',
+            'blog_post': 'Blog Post',
+            'marketing_copy': 'Marketing Copy',
+            'creative_writing': 'Creative Writing',
+            'product_description': 'Product Description',
+            'email_campaign': 'Email Campaign',
+            'press_release': 'Press Release'
+        }
+        
+        return type_titles.get(content_type, 'Generated Content')
+    
+    def _calculate_cost(self, tokens: int) -> Decimal:
+        """Calculate estimated cost based on tokens"""
+        # GPT-4 Turbo pricing (approximate)
+        cost_per_1k_tokens = Decimal('0.01')  # $0.01 per 1K tokens
+        return (Decimal(tokens) / 1000) * cost_per_1k_tokens
+    
+    def _track_usage(self, user: CreatorProfile, usage_type: str):
+        """Track user usage for rate limiting"""
+        today = timezone.now().date()
+        
+        usage, created = UserUsageTracking.objects.get_or_create(
+            user=user,
+            usage_type=usage_type,
+            date=today,
+            defaults={'daily_count': 0, 'monthly_count': 0}
+        )
+        
+        usage.daily_count += 1
+        usage.monthly_count += 1
+        usage.save()
+    
+    def _track_token_usage(self, user: CreatorProfile, tokens: int, cost: Decimal):
+        """Track token usage and costs"""
+        today = timezone.now().date()
+        
+        usage, created = UserUsageTracking.objects.get_or_create(
+            user=user,
+            usage_type='content_generation',
+            date=today,
+            defaults={'tokens_consumed': 0, 'cost_incurred': Decimal('0.00')}
+        )
+        
+        usage.tokens_consumed += tokens
+        usage.cost_incurred += cost
+        usage.save()
+    
+    def get_user_usage_stats(self, user: CreatorProfile) -> Dict:
+        """Get user's usage statistics"""
+        today = timezone.now().date()
+        
+        # Get today's usage
+        today_usage = UserUsageTracking.objects.filter(
+            user=user,
+            date=today
+        ).first()
+        
+        # Get monthly totals
+        month_start = today.replace(day=1)
+        monthly_usage = UserUsageTracking.objects.filter(
+            user=user,
+            date__gte=month_start
+        ).aggregate(
+            total_requests=models.Sum('daily_count'),
+            total_tokens=models.Sum('tokens_consumed'),
+            total_cost=models.Sum('cost_incurred')
+        )
+        
+        return {
+            'daily_requests': today_usage.daily_count if today_usage else 0,
+            'daily_tokens': today_usage.tokens_consumed if today_usage else 0,
+            'daily_cost': today_usage.cost_incurred if today_usage else Decimal('0.00'),
+            'monthly_requests': monthly_usage['total_requests'] or 0,
+            'monthly_tokens': monthly_usage['total_tokens'] or 0,
+            'monthly_cost': monthly_usage['total_cost'] or Decimal('0.00')
+        }
+    
+    def create_template_from_request(self, request: ContentGenerationRequest, name: str, description: str = '') -> ContentTemplate:
+        """Create a reusable template from a successful request"""
+        template = ContentTemplate.objects.create(
+            creator=request.user,
+            name=name,
+            description=description,
+            template_type='prompt',
+            content_type=request.content_type,
+            prompt_template=request.prompt,
+            default_parameters={
+                'platform': request.platform,
+                'target_audience': request.target_audience,
+                'tone': request.tone,
+                'word_count': request.word_count,
+                'duration_minutes': request.duration_minutes,
+                'temperature': request.temperature,
+                'max_tokens': request.max_tokens
+            }
+        )
+        return template
+    
+    def use_template(self, template: ContentTemplate, user: CreatorProfile, custom_params: Dict = None) -> ContentGenerationRequest:
+        """Create a new request using a template"""
+        params = template.default_parameters.copy()
+        if custom_params:
+            params.update(custom_params)
+        
+        request_data = {
+            'content_type': template.content_type,
+            'prompt': template.prompt_template,
+            'topic': params.get('topic', ''),
+            **params
+        }
+        
+        # Increment template usage
+        template.usage_count += 1
+        template.save()
+        
+        return self.create_content_request(user, request_data)
+
 
 # Service instance
 content_generation_service = AIContentGenerationService()

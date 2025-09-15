@@ -1,0 +1,185 @@
+{
+  "phase": "Phase 4 - UI/UX Overhaul & Monetization",
+  "scope": "Modern design system, component library, themes, micro-interactions, responsive design",
+  "srs_sections": ["5.1", "5.2", "5.3", "5.4", "5.5", "4.4"],
+  "agents": {
+    "CodeSync": [
+      "design-system",
+      "component-library", 
+      "theme-implementation",
+      "responsive-layouts"
+    ],
+    "Polish_Verify": [
+      "accessibility-testing",
+      "performance-optimization",
+      "cross-browser-testing",
+      "mobile-testing"
+    ],
+    "Guardian": [
+      "design-standards-compliance",
+      "accessibility-audit",
+      "performance-gate",
+      "deployment-readiness"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "P4-001",
+      "title": "Design System Foundation",
+      "owner": "CodeSync",
+      "priority": "high",
+      "dependencies": [],
+      "deliverables": [
+        "Design tokens (colors, typography, spacing, radii, elevation)",
+        "CSS custom properties implementation",
+        "Light/Dark theme infrastructure",
+        "Motion design tokens with prefers-reduced-motion support"
+      ],
+      "acceptance_criteria": [
+        "WCAG AA contrast compliance",
+        "Consistent token usage across components",
+        "Theme switching without page reload",
+        "Reduced motion respect"
+      ]
+    },
+    {
+      "id": "P4-002", 
+      "title": "Component Library Modernization",
+      "owner": "CodeSync",
+      "priority": "high",
+      "dependencies": ["P4-001"],
+      "deliverables": [
+        "Modern Button, Input, Select, Chip components",
+        "Avatar, Card, Media Gallery components",
+        "File Uploader with drag-drop and progress",
+        "Toast, Modal, Drawer sheet components",
+        "Empty states and skeleton loaders"
+      ],
+      "acceptance_criteria": [
+        "Full accessibility with ARIA roles and focus management",
+        "Consistent design token usage",
+        "TypeScript definitions",
+        "Comprehensive test coverage"
+      ]
+    },
+    {
+      "id": "P4-003",
+      "title": "Layout Pattern Implementation", 
+      "owner": "CodeSync",
+      "priority": "high",
+      "dependencies": ["P4-002"],
+      "deliverables": [
+        "Responsive Home layout with personalized feed",
+        "Search split layout (filters + results grid)",
+        "Profile tabs with sticky CTA",
+        "Messages 3-pane desktop / 2-pane mobile",
+        "Admin data tables with bulk actions"
+      ],
+      "acceptance_criteria": [
+        "Mobile-first responsive design",
+        "Keyboard navigation support",
+        "Performance optimized layouts",
+        "Cross-browser compatibility"
+      ]
+    },
+    {
+      "id": "P4-004",
+      "title": "Micro-interactions & Optimistic UI",
+      "owner": "CodeSync", 
+      "priority": "medium",
+      "dependencies": ["P4-002"],
+      "deliverables": [
+        "Hover/tap state animations",
+        "Loading skeleton implementations",
+        "Optimistic UI for DMs and invites",
+        "Smooth transitions and feedback"
+      ],
+      "acceptance_criteria": [
+        "Animations respect prefers-reduced-motion",
+        "No spinner > 300ms without context",
+        "Smooth 60fps animations",
+        "Graceful fallbacks for slow connections"
+      ]
+    },
+    {
+      "id": "P4-005",
+      "title": "Accessibility Compliance",
+      "owner": "Polish_Verify",
+      "priority": "high", 
+      "dependencies": ["P4-002", "P4-003"],
+      "deliverables": [
+        "WCAG AA compliance audit",
+        "Screen reader testing",
+        "Keyboard navigation testing",
+        "Focus management improvements"
+      ],
+      "acceptance_criteria": [
+        "100% WCAG AA compliance",
+        "Screen reader compatibility",
+        "Full keyboard accessibility",
+        "Skip-to-content links"
+      ]
+    },
+    {
+      "id": "P4-006",
+      "title": "Performance Optimization",
+      "owner": "Polish_Verify",
+      "priority": "medium",
+      "dependencies": ["P4-003", "P4-004"],
+      "deliverables": [
+        "Bundle size optimization",
+        "Image optimization and lazy loading",
+        "Code splitting implementation", 
+        "Performance monitoring setup"
+      ],
+      "acceptance_criteria": [
+        "Lighthouse score > 90",
+        "First Contentful Paint < 1.5s",
+        "Bundle size < 200KB gzipped",
+        "Core Web Vitals compliance"
+      ]
+    },
+    {
+      "id": "P4-007",
+      "title": "Monetization UI Components",
+      "owner": "CodeSync",
+      "priority": "medium",
+      "dependencies": ["P4-002"],
+      "deliverables": [
+        "Subscription plan selection UI",
+        "Payment flow components",
+        "Ad placement components",
+        "Premium feature gates"
+      ],
+      "acceptance_criteria": [
+        "Secure payment integration",
+        "Clear pricing communication",
+        "Accessible ad controls",
+        "Smooth upgrade flows"
+      ]
+    }
+  ],
+  "migrations": [
+    "Add theme preference to user settings",
+    "Create design_tokens table for dynamic theming",
+    "Add accessibility_preferences to user profiles"
+  ],
+  "ci_updates": [
+    "Add accessibility testing to CI pipeline",
+    "Performance budget enforcement",
+    "Visual regression testing",
+    "Cross-browser testing matrix"
+  ],
+  "environment_variables": [
+    "THEME_API_ENDPOINT",
+    "PERFORMANCE_MONITORING_KEY",
+    "ACCESSIBILITY_TESTING_TOKEN"
+  ],
+  "success_metrics": [
+    "WCAG AA compliance: 100%",
+    "Lighthouse Performance: >90",
+    "User satisfaction: >4.5/5",
+    "Mobile usability: >95%",
+    "Theme adoption: >60% users"
+  ]
+}

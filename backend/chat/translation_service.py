@@ -5,7 +5,7 @@ Implements REQ-11: Real-time translation for chats and profiles
 import openai
 from django.conf import settings
 from typing import Dict, List, Optional
-from .enhanced_models import Message, TranslationRequest
+from .models import ChatMessage
 from accounts.models import CreatorProfile
 
 class TranslationService:
@@ -40,7 +40,7 @@ class TranslationService:
                 self.client = None
         return self.client
     
-    def translate_message(self, message: Message, target_language: str, requester: CreatorProfile) -> Dict:
+    def translate_message(self, message: ChatMessage, target_language: str, requester: CreatorProfile) -> Dict:
         """
         Translate a message to target language
         
@@ -109,17 +109,10 @@ class TranslationService:
                 'confidence': confidence_score,
                 'translator': 'ai'
             }
-            message.is_translated = True
+            # Note: is_translated field would need to be added to ChatMessage model
             message.save()
             
-            # Create translation request record
-            TranslationRequest.objects.create(
-                message=message,
-                requester=requester,
-                target_language=target_language,
-                translated_content=translated_content,
-                confidence_score=confidence_score
-            )
+            # Translation request tracking could be added here if needed
             
             return {
                 'success': True,
@@ -237,7 +230,7 @@ class TranslationService:
         except Exception:
             return 'en'
     
-    def get_translation_suggestions(self, message: Message, user_profile: CreatorProfile) -> List[str]:
+    def get_translation_suggestions(self, message: ChatMessage, user_profile: CreatorProfile) -> List[str]:
         """
         Get suggested languages for translation based on chat participants
         
@@ -293,7 +286,7 @@ class TranslationService:
             'error': 'AI translation service unavailable'
         }
     
-    def batch_translate_messages(self, messages: List[Message], target_language: str, requester: CreatorProfile) -> Dict:
+    def batch_translate_messages(self, messages: List[ChatMessage], target_language: str, requester: CreatorProfile) -> Dict:
         """
         Translate multiple messages in batch
         

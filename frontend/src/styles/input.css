@@ -1,0 +1,67 @@
+/* Input Component Styles */
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.input-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  margin-bottom: var(--space-1);
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.input-icon--left {
+  left: var(--space-3);
+}
+
+.input-icon--right {
+  right: var(--space-3);
+}
+
+.input--with-left-icon {
+  padding-left: 2.5rem;
+}
+
+.input--with-right-icon {
+  padding-right: 2.5rem;
+}
+
+.input-helper {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+
+.input-helper--error {
+  color: var(--text-error);
+}
+
+/* Focus within wrapper */
+.input-wrapper:focus-within .input-icon {
+  color: var(--text-brand);
+}
+
+/* Animation for icons */
+.input-icon svg {
+  width: 1rem;
+  height: 1rem;
+  transition: color var(--duration-fast) var(--easing-ease-out);
+}
