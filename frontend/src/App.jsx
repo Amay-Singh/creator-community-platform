@@ -12,6 +12,7 @@ import Register from './components/Auth/Register';
 import Dashboard from './components/Dashboard/Dashboard';
 import SubscriptionDashboard from './components/Subscription/SubscriptionDashboard';
 import ProfileSetup from './components/Profile/ProfileSetup';
+import MatchingPageSimple from './pages/MatchingPageSimple';
 import './App.css';
 
 function App() {
@@ -41,6 +42,12 @@ function App() {
               <Route path="/subscription" element={
                 <ProtectedRoute>
                   <SubscriptionDashboard />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/matching" element={
+                <ProtectedRoute>
+                  <MatchingPageSimple />
                 </ProtectedRoute>
               } />
               
