@@ -1,0 +1,156 @@
+{
+  "task_id": "P5-006",
+  "title": "AI Content Generation Assistant Implementation",
+  "phase": "5",
+  "priority": "high",
+  "estimated_hours": 18,
+  "dependencies": ["P5-001-ai-matching", "P5-005-project-management"],
+  "requirements_refs": ["REQ-15", "REQ-16", "REQ-17"],
+  "agents_assigned": {
+    "orchestrator": "Task coordination and progress tracking",
+    "codesync": "AI content generation models, OpenAI integration, API endpoints",
+    "polish": "Testing, prompt optimization, content validation",
+    "guardian": "Security validation, API key management, content filtering"
+  },
+  "deliverables": [
+    {
+      "id": "ai_content_models",
+      "title": "AI Content Generation Models",
+      "agent": "codesync",
+      "files": [
+        "backend/ai_services/models.py",
+        "backend/ai_services/migrations/0003_content_generation.py"
+      ],
+      "acceptance_criteria": [
+        "ContentGenerationRequest model with prompt and parameters",
+        "GeneratedContent model with versioning and feedback",
+        "ContentTemplate model for reusable prompts",
+        "ContentCategory model for organization",
+        "User usage tracking and rate limiting"
+      ]
+    },
+    {
+      "id": "openai_integration",
+      "title": "OpenAI GPT-4 Integration Service",
+      "agent": "codesync",
+      "files": [
+        "backend/ai_services/openai_service.py",
+        "backend/ai_services/content_generator.py"
+      ],
+      "acceptance_criteria": [
+        "OpenAI API client with error handling",
+        "Multiple content types support (text, social media, scripts)",
+        "Prompt engineering for creator-specific content",
+        "Token usage tracking and cost management",
+        "Response caching and optimization"
+      ]
+    },
+    {
+      "id": "content_generation_api",
+      "title": "Content Generation API Endpoints",
+      "agent": "codesync",
+      "files": [
+        "backend/ai_services/views.py",
+        "backend/ai_services/serializers.py",
+        "backend/ai_services/urls.py"
+      ],
+      "acceptance_criteria": [
+        "Generate content endpoint with customizable parameters",
+        "Content history and management endpoints",
+        "Template CRUD operations",
+        "Content feedback and rating system",
+        "Usage analytics and reporting"
+      ]
+    },
+    {
+      "id": "content_types_support",
+      "title": "Multi-Format Content Generation",
+      "agent": "codesync",
+      "files": [
+        "backend/ai_services/content_types.py",
+        "backend/ai_services/prompts.py"
+      ],
+      "acceptance_criteria": [
+        "Social media posts (Instagram, TikTok, YouTube)",
+        "Video scripts and storyboards",
+        "Blog posts and articles",
+        "Marketing copy and descriptions",
+        "Creative writing and storytelling"
+      ]
+    },
+    {
+      "id": "ai_content_tests",
+      "title": "AI Content Generation Test Suite",
+      "agent": "polish",
+      "files": [
+        "backend/ai_services/tests/test_content_generation.py",
+        "backend/ai_services/tests/test_openai_integration.py"
+      ],
+      "acceptance_criteria": [
+        "Content generation API tests",
+        "OpenAI integration mocking and testing",
+        "Prompt optimization validation",
+        "Rate limiting and usage tracking tests",
+        "Content quality and safety tests"
+      ]
+    }
+  ],
+  "technical_specs": {
+    "ai_model": "GPT-4 Turbo",
+    "max_tokens": 4000,
+    "content_types": [
+      "social_media_post",
+      "video_script",
+      "blog_post",
+      "marketing_copy",
+      "creative_writing",
+      "product_description"
+    ],
+    "supported_platforms": [
+      "instagram",
+      "tiktok", 
+      "youtube",
+      "twitter",
+      "linkedin",
+      "facebook"
+    ],
+    "rate_limits": {
+      "free_tier": "10 requests/day",
+      "premium_tier": "100 requests/day",
+      "pro_tier": "unlimited"
+    }
+  },
+  "security_requirements": [
+    "OpenAI API key secure storage and rotation",
+    "Content filtering for inappropriate material",
+    "User input sanitization and validation",
+    "Rate limiting and abuse prevention",
+    "Audit trail for all AI-generated content"
+  ],
+  "performance_targets": {
+    "response_time": "<10s for standard content generation",
+    "availability": "99.5% uptime for AI service",
+    "token_efficiency": "Optimize prompts for minimal token usage",
+    "cache_hit_rate": ">80% for similar content requests"
+  },
+  "integration_points": {
+    "user_profiles": "Personalized content based on creator profile",
+    "project_management": "Generate content for project tasks",
+    "collaboration_system": "Share and collaborate on generated content",
+    "analytics": "Track content performance and usage metrics"
+  },
+  "prompt_engineering": {
+    "base_prompts": {
+      "social_media": "Create engaging social media content for {platform} targeting {audience}",
+      "video_script": "Write a compelling video script for {duration} minutes about {topic}",
+      "blog_post": "Write a {word_count} word blog post about {topic} in {tone} tone"
+    },
+    "personalization_factors": [
+      "creator_niche",
+      "target_audience", 
+      "brand_voice",
+      "content_style",
+      "platform_preferences"
+    ]
+  }
+}

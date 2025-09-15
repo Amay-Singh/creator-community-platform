@@ -12,6 +12,15 @@ class ChatRoomSerializer(serializers.ModelSerializer):
         model = ChatRoom
         fields = ['id', 'room_type', 'name', 'participants', 'is_active', 'created_at', 'last_message_at']
 
+class ChatMessageSerializer(serializers.ModelSerializer):
+    sender = CreatorProfileSerializer(read_only=True)
+    
+    class Meta:
+        model = ChatMessage
+        fields = ['id', 'content', 'message_type', 'sender', 'file', 'file_name', 'file_size', 
+                 'original_language', 'translations', 'is_edited', 'is_deleted', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'sender', 'created_at', 'updated_at']
+
 class MessageSerializer(serializers.ModelSerializer):
     sender = CreatorProfileSerializer(read_only=True)
     
