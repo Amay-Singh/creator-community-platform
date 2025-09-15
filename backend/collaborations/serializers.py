@@ -6,7 +6,10 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
-from .models import Collaboration, CollaborationInvite as OldCollaborationInvite
+from .models import (
+    Collaboration, CollaborationInvite as OldCollaborationInvite,
+    Project, ProjectMembership, Task, TaskComment, ProjectFile, ProjectMilestone
+)
 from .invitation_system import NewCollaborationInvite, InviteTemplate
 from accounts.serializers import CreatorProfileSerializer
 
@@ -140,3 +143,128 @@ class InviteStatsSerializer(serializers.Serializer):
     received_declined = serializers.IntegerField()
     acceptance_rate = serializers.FloatField()
     response_rate = serializers.FloatField()
+
+
+# P5-005 Project Management Serializers
+
+class ProjectMembershipSerializer(serializers.ModelSerializer):
+    """Serializer for project membership"""
+    member = CreatorProfileSerializer(read_only=True)
+    
+    class Meta:
+        model = ProjectMembership
+        fields = [
+            'id', 'member', 'role', 'can_edit_project', 'can_manage_tasks',
+            'can_upload_files', 'can_invite_members', 'joined_at'
+        ]
+
+
+class ProjectSerializer(serializers.ModelSerializer):
+    """Serializer for projects"""
+    owner = CreatorProfileSerializer(read_only=True)
+    memberships = ProjectMembershipSerializer(many=True, read_only=True)
+    total_tasks = serializers.ReadOnlyField()
+    completed_tasks = serializers.ReadOnlyField()
+    
+    class Meta:
+        model = Project
+        fields = [
+            'id', 'title', 'description', 'owner', 'status', 'priority',
+            'progress_percentage', 'start_date', 'end_date', 'estimated_hours',
+            'actual_hours', 'budget', 'is_public', 'allow_file_sharing',
+            'enable_time_tracking', 'created_at', 'updated_at', 'last_activity_at',
+            'memberships', 'total_tasks', 'completed_tasks'
+        ]
+        read_only_fields = ['id', 'owner', 'progress_percentage', 'actual_hours', 'last_activity_at']
+
+
+class TaskSerializer(serializers.ModelSerializer):
+    """Serializer for Kanban tasks"""
+    assignee = CreatorProfileSerializer(read_only=True)
+    created_by = CreatorProfileSerializer(read_only=True)
+    assignee_id = serializers.UUIDField(write_only=True, required=False, allow_null=True)
+    
+    class Meta:
+        model = Task
+        fields = [
+            'id', 'project', 'title', 'description', 'status', 'priority',
+            'assignee', 'assignee_id', 'created_by', 'due_date', 'estimated_hours',
+            'actual_hours', 'board_order', 'created_at', 'updated_at', 'completed_at'
+        ]
+        read_only_fields = ['id', 'created_by', 'completed_at']
+    
+    def validate_assignee_id(self, value):
+        if value:
+            from accounts.models import CreatorProfile
+            try:
+                CreatorProfile.objects.get(id=value)
+            except CreatorProfile.DoesNotExist:
+                raise serializers.ValidationError("Invalid assignee ID")
+        return value
+
+
+class TaskCommentSerializer(serializers.ModelSerializer):
+    """Serializer for task comments"""
+    author = CreatorProfileSerializer(read_only=True)
+    
+    class Meta:
+        model = TaskComment
+        fields = ['id', 'task', 'author', 'content', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'author']
+
+
+class ProjectFileSerializer(serializers.ModelSerializer):
+    """Serializer for project files"""
+    uploaded_by = CreatorProfileSerializer(read_only=True)
+    file_size_mb = serializers.ReadOnlyField()
+    
+    class Meta:
+        model = ProjectFile
+        fields = [
+            'id', 'project', 'task', 'name', 'description', 'file', 'file_type',
+            'file_size', 'file_size_mb', 'mime_type', 'version', 'uploaded_by',
+            'is_public', 'download_count', 'virus_scan_status', 'created_at'
+        ]
+        read_only_fields = [
+            'id', 'file_size', 'mime_type', 'uploaded_by', 'download_count',
+            'virus_scan_status', 'version'
+        ]
+
+
+class ProjectMilestoneSerializer(serializers.ModelSerializer):
+    """Serializer for project milestones"""
+    created_by = CreatorProfileSerializer(read_only=True)
+    
+    class Meta:
+        model = ProjectMilestone
+        fields = [
+            'id', 'project', 'title', 'description', 'status', 'due_date',
+            'completion_percentage', 'created_by', 'created_at', 'completed_at'
+        ]
+        read_only_fields = ['id', 'created_by', 'completed_at']
+
+
+class KanbanBoardSerializer(serializers.Serializer):
+    """Serializer for Kanban board data"""
+    todo = TaskSerializer(many=True, read_only=True)
+    in_progress = TaskSerializer(many=True, read_only=True)
+    review = TaskSerializer(many=True, read_only=True)
+    done = TaskSerializer(many=True, read_only=True)
+
+
+class TaskMoveSerializer(serializers.Serializer):
+    """Serializer for moving tasks in Kanban board"""
+    status = serializers.ChoiceField(choices=Task.STATUS_CHOICES)
+    board_order = serializers.IntegerField(min_value=0)
+
+
+class ProjectCreateSerializer(serializers.ModelSerializer):
+    """Serializer for creating projects"""
+    
+    class Meta:
+        model = Project
+        fields = [
+            'title', 'description', 'priority', 'start_date', 'end_date',
+            'estimated_hours', 'budget', 'is_public', 'allow_file_sharing',
+            'enable_time_tracking'
+        ]

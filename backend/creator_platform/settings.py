@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "corsheaders",
+    "channels",
     "accounts",
     "ai_services",
     "chat",
@@ -193,3 +194,27 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # --- Custom User Model
 AUTH_USER_MODEL = "accounts.CustomUser"
+
+# --- Django Channels Configuration
+ASGI_APPLICATION = "creator_platform.asgi.application"
+
+# --- Redis Configuration for Channels
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [os.environ.get("REDIS_URL", "redis://localhost:6379")],
+        },
+    },
+}
+
+# --- Cache Configuration (Redis)
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": os.environ.get("REDIS_URL", "redis://localhost:6379/1"),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}

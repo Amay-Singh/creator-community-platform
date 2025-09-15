@@ -1,12 +1,21 @@
 """
 URL patterns for ai_services app
+Enhanced for P5-006: AI Content Generation Assistant
 """
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from . import views
 from . import recommendation_api
 from . import search_api
 
 app_name = 'ai_services'
+
+# P5-006 AI Content Generation Assistant Router
+router = DefaultRouter()
+router.register(r'content-requests', views.ContentGenerationRequestViewSet, basename='content-requests')
+router.register(r'generated-content', views.GeneratedContentViewSet, basename='generated-content')
+router.register(r'templates', views.ContentTemplateViewSet, basename='templates')
+router.register(r'categories', views.ContentCategoryViewSet, basename='categories')
 
 urlpatterns = [
     # AI Content Validation
@@ -14,6 +23,12 @@ urlpatterns = [
     
     # AI Content Generation
     path('generate/', views.generate_content, name='generate_content'),
+    
+    # P5-006 AI Content Generation Assistant API
+    path('content/', include(router.urls)),
+    path('content/stats/', views.content_generation_stats, name='content_stats'),
+    path('content/usage/', views.usage_tracking, name='usage_tracking'),
+    path('content/batch/', views.batch_generate, name='batch_generate'),
     
     # AI Matching and Recommendations
     path('match/suggestions/', recommendation_api.generate_suggestions, name='match_suggestions'),

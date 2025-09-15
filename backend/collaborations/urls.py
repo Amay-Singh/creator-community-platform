@@ -1,10 +1,20 @@
 """
 URL patterns for collaborations app
 Includes P5-003 Collaboration Invitation System endpoints
+P5-005 Project Management Tools endpoints
 """
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from . import views
 from . import invitation_api
+
+# P5-005 Project Management Router
+router = DefaultRouter()
+router.register(r'projects', views.ProjectViewSet, basename='project')
+router.register(r'tasks', views.TaskViewSet, basename='task')
+router.register(r'task-comments', views.TaskCommentViewSet, basename='taskcomment')
+router.register(r'project-files', views.ProjectFileViewSet, basename='projectfile')
+router.register(r'milestones', views.ProjectMilestoneViewSet, basename='milestone')
 # from .enhanced_views import (
 #     CollaborationInviteListView, CollaborationInviteDetailView,
 #     CollaborationInviteCreateView, collaboration_suggestions
@@ -18,6 +28,9 @@ from . import invitation_api
 app_name = 'collaborations'
 
 urlpatterns = [
+    # P5-005 Project Management API
+    path('api/', include(router.urls)),
+    
     # Basic collaboration endpoints
     path('', views.CollaborationListView.as_view(), name='collaboration_list'),
     path('invites/', views.CollaborationInviteView.as_view(), name='collaboration_invites'),
