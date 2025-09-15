@@ -1,0 +1,119 @@
+{
+  "task_id": "P5-004",
+  "title": "Real-time Messaging System Implementation",
+  "phase": "5",
+  "priority": "high",
+  "estimated_hours": 16,
+  "dependencies": ["P5-003-collaboration-invites"],
+  "requirements_refs": ["REQ-9", "REQ-11", "REQ-20"],
+  "agents_assigned": {
+    "orchestrator": "Task coordination and progress tracking",
+    "codesync": "WebSocket consumers, API endpoints, translation service",
+    "polish": "Testing, refactoring, coverage validation",
+    "guardian": "Standards compliance, security validation"
+  },
+  "deliverables": [
+    {
+      "id": "websocket_infrastructure",
+      "title": "WebSocket Consumers and Routing",
+      "agent": "codesync",
+      "files": [
+        "backend/chat/consumers.py",
+        "backend/chat/routing.py",
+        "backend/creator_platform/asgi.py"
+      ],
+      "acceptance_criteria": [
+        "ChatConsumer handles connect/disconnect/message events",
+        "Typing indicators and presence tracking implemented",
+        "Room-based message broadcasting functional",
+        "Authentication middleware integrated"
+      ]
+    },
+    {
+      "id": "chat_api_endpoints",
+      "title": "REST API Endpoints for Chat",
+      "agent": "codesync",
+      "files": [
+        "backend/chat/views.py",
+        "backend/chat/serializers.py",
+        "backend/chat/urls.py"
+      ],
+      "acceptance_criteria": [
+        "CRUD operations for chat rooms",
+        "Message history pagination",
+        "File upload support",
+        "Read status tracking"
+      ]
+    },
+    {
+      "id": "translation_service",
+      "title": "Auto-translation Integration",
+      "agent": "codesync",
+      "files": [
+        "backend/chat/translation_service.py",
+        "backend/chat/models.py"
+      ],
+      "acceptance_criteria": [
+        "OpenAI translation API integration",
+        "Language detection and caching",
+        "Translation storage in message model",
+        "Error handling for translation failures"
+      ]
+    },
+    {
+      "id": "database_migrations",
+      "title": "Database Schema Updates",
+      "agent": "codesync",
+      "files": [
+        "backend/chat/migrations/0002_realtime_features.py"
+      ],
+      "acceptance_criteria": [
+        "Migration creates required indexes",
+        "Supports existing chat models",
+        "No data loss during migration"
+      ]
+    },
+    {
+      "id": "comprehensive_tests",
+      "title": "Test Suite for Messaging System",
+      "agent": "polish",
+      "files": [
+        "backend/chat/tests/test_consumers.py",
+        "backend/chat/tests/test_api.py",
+        "backend/chat/tests/test_translation.py"
+      ],
+      "acceptance_criteria": [
+        "WebSocket consumer tests with channels testing",
+        "API endpoint integration tests",
+        "Translation service unit tests",
+        "Coverage >85% for chat module"
+      ]
+    }
+  ],
+  "technical_specs": {
+    "websocket_protocol": "channels 4.0.0 with Redis backend",
+    "message_format": "JSON with type, content, metadata fields",
+    "authentication": "Token-based via Django REST auth",
+    "translation_api": "OpenAI GPT-3.5-turbo for translation",
+    "caching_strategy": "Redis for presence, typing indicators",
+    "file_storage": "Django FileField with size limits"
+  },
+  "security_requirements": [
+    "Room access validation per user permissions",
+    "Message content sanitization",
+    "File upload virus scanning placeholder",
+    "Rate limiting on message sending",
+    "No sensitive data in WebSocket logs"
+  ],
+  "performance_targets": {
+    "message_latency": "<100ms for same-region users",
+    "concurrent_connections": "500+ per server instance",
+    "message_throughput": "1000+ messages/minute",
+    "translation_cache_hit": ">80% for common languages"
+  },
+  "rollout_plan": {
+    "phase_1": "WebSocket infrastructure and basic messaging",
+    "phase_2": "Translation service and file sharing",
+    "phase_3": "Advanced features (typing, presence, read receipts)"
+  }
+}
