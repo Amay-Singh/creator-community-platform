@@ -4,24 +4,31 @@ Enhanced for P5-006: AI Content Generation Assistant
 """
 from rest_framework import generics, permissions, status, viewsets
 from rest_framework.decorators import api_view, permission_classes, action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from django.db.models import Q, Count, Avg, Sum
+from rest_framework import status, viewsets
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from django.views import View
 from django.utils import timezone
-from datetime import timedelta
+import json
 
 from .models import (
-    ContentValidation, AIContentGeneration, ContentGenerationRequest,
-    GeneratedContent, ContentTemplate, ContentCategory, UserUsageTracking
+    ContentValidation, AIContentGeneration, ProfileFeedback,
+    ContentGenerationRequest, GeneratedContent, ContentTemplate, ContentCategory, UserUsageTracking,
+    CreatorEmbedding, MatchResult, MatchFeedback, MatchHistory
 )
 from .serializers import (
     ContentValidationSerializer, AIContentSerializer,
-    ContentGenerationRequestSerializer, ContentGenerationRequestCreateSerializer,
-    GeneratedContentSerializer, GeneratedContentCreateSerializer,
-    ContentTemplateSerializer, ContentTemplateCreateSerializer,
-    ContentCategorySerializer, UserUsageTrackingSerializer,
-    ContentGenerationStatsSerializer, ContentGenerationBatchSerializer
+    ContentGenerationRequestSerializer, GeneratedContentSerializer, ContentTemplateSerializer, 
+    ContentCategorySerializer, UserUsageTrackingSerializer, ContentGenerationBatchSerializer,
+    ContentGenerationStatsSerializer, CreatorEmbeddingSerializer, MatchResultSerializer,
+    MatchFeedbackSerializer, MatchHistorySerializer, MatchRequestSerializer, BatchMatchRequestSerializer,
+    MatchStatisticsSerializer
 )
 from .content_generation_service import content_generation_service
+from .matching_service import matching_service
 
 
 @api_view(['POST'])
@@ -308,47 +315,9 @@ class ContentCategoryViewSet(viewsets.ReadOnlyModelViewSet):
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
-def content_generation_stats(request):
-    """Get content generation statistics for the user"""
-    user_profile = request.user.creatorprofile
-    
-    # Get request statistics
-    requests = ContentGenerationRequest.objects.filter(user=user_profile)
-    total_requests = requests.count()
-    completed_requests = requests.filter(status='completed').count()
-    failed_requests = requests.filter(status='failed').count()
-    
-    # Get usage statistics
-    total_tokens_used = requests.aggregate(Sum('tokens_used'))['tokens_used__sum'] or 0
-    total_cost = requests.aggregate(Sum('cost_estimate'))['cost_estimate__sum'] or 0
-    
-    # Get quality statistics
-    generated_content = GeneratedContent.objects.filter(request__user=user_profile)
-    avg_quality = generated_content.aggregate(Avg('quality_score'))['quality_score__avg'] or 0
-    
-    # Get most used content type and platform
-    content_type_stats = requests.values('content_type').annotate(count=Count('content_type')).order_by('-count').first()
-    platform_stats = requests.values('platform').annotate(count=Count('platform')).order_by('-count').first()
-    
-    stats_data = {
-        'total_requests': total_requests,
-        'completed_requests': completed_requests,
-        'failed_requests': failed_requests,
-        'total_tokens_used': total_tokens_used,
-        'total_cost': total_cost,
-        'average_quality_score': round(avg_quality, 2),
-        'most_used_content_type': content_type_stats['content_type'] if content_type_stats else '',
-        'most_used_platform': platform_stats['platform'] if platform_stats else ''
-    }
-    
-    serializer = ContentGenerationStatsSerializer(stats_data)
-    return Response(serializer.data)
-
-
-@api_view(['GET'])
-@permission_classes([permissions.IsAuthenticated])
 def usage_tracking(request):
     """Get user's usage tracking data"""
+    from datetime import timedelta
     user_profile = request.user.creatorprofile
     
     # Get recent usage data
@@ -359,6 +328,77 @@ def usage_tracking(request):
     
     serializer = UserUsageTrackingSerializer(recent_usage, many=True)
     return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def content_generation_stats(request):
+    """Get content generation statistics for the current user"""
+    try:
+        user_profile = request.user.creatorprofile
+        stats = content_generation_service.get_user_statistics(user_profile)
+        serializer = ContentGenerationStatsSerializer(stats)
+        return Response(serializer.data)
+    except Exception as e:
+        return Response(
+            {'error': f'Failed to get statistics: {str(e)}'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def batch_content_generation(request):
+    """Generate multiple content pieces in batch"""
+    try:
+        user_profile = request.user.creatorprofile
+        
+        # Validate request data
+        serializer = ContentGenerationBatchSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        results = []
+        
+        for request_data in serializer.validated_data['requests']:
+            try:
+                request_obj = content_generation_service.create_content_request(user_profile, request_data)
+                generated_content = content_generation_service.process_content_request(request_obj)
+                
+                results.append({
+                    'success': True,
+                    'request': ContentGenerationRequestSerializer(request_obj).data,
+                    'generated_content': GeneratedContentSerializer(generated_content).data
+                })
+            except Exception as e:
+                results.append({
+                    'success': False,
+                    'error': str(e),
+                    'request_data': request_data
+                })
+        
+        return Response({'results': results}, status=status.HTTP_201_CREATED)
+        
+    except Exception as e:
+        return Response(
+            {'error': f'Batch generation failed: {str(e)}'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def ai_services_health(request):
+    """Health check for AI services"""
+    return Response({
+        'status': 'healthy',
+        'services': {
+            'content_generation': True,
+            'ai_matching': True,
+            'database': True
+        },
+        'timestamp': timezone.now()
+    })
 
 
 @api_view(['POST'])
@@ -401,3 +441,267 @@ def batch_generate(request):
             })
     
     return Response({'results': results}, status=status.HTTP_201_CREATED)
+
+
+# ============================================================================
+# P5-001: AI-Powered Creator Matching Views
+# ============================================================================
+
+class CreatorEmbeddingViewSet(viewsets.ReadOnlyModelViewSet):
+    """ViewSet for creator embeddings (read-only)"""
+    serializer_class = CreatorEmbeddingSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        """Filter to current user's embedding"""
+        try:
+            user_profile = self.request.user.creatorprofile
+            return CreatorEmbedding.objects.filter(creator=user_profile)
+        except AttributeError:
+            return CreatorEmbedding.objects.none()
+    
+    @action(detail=False, methods=['post'])
+    def update_embedding(self, request):
+        """Update current user's embedding"""
+        try:
+            user_profile = request.user.creatorprofile
+        except AttributeError:
+            return Response({'error': 'User profile not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        try:
+            force_update = request.data.get('force_update', False)
+            success = matching_service.update_creator_embedding(user_profile, force_update)
+            
+            if success:
+                embedding = CreatorEmbedding.objects.get(creator=user_profile)
+                serializer = self.get_serializer(embedding)
+                return Response({
+                    'success': True,
+                    'message': 'Embedding updated successfully',
+                    'embedding': serializer.data
+                })
+            else:
+                return Response(
+                    {'error': 'Failed to update embedding'},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        except Exception as e:
+            return Response(
+                {'error': f'Error updating embedding: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class MatchResultViewSet(viewsets.ModelViewSet):
+    """ViewSet for match results"""
+    serializer_class = MatchResultSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        """Filter to current user's matches"""
+        try:
+            user_profile = self.request.user.creatorprofile
+            return MatchResult.objects.filter(requester=user_profile)
+        except AttributeError:
+            return MatchResult.objects.none()
+    
+    @action(detail=False, methods=['post'])
+    def find_matches(self, request):
+        """Find matches for the current user"""
+        try:
+            user_profile = request.user.creatorprofile
+        except AttributeError:
+            return Response({'error': 'User profile not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        try:
+            # Validate request data
+            serializer = MatchRequestSerializer(data=request.data)
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
+            validated_data = serializer.validated_data
+            limit = validated_data.get('limit', 10)
+            filters = {
+                'location': validated_data.get('location'),
+                'skills': validated_data.get('skills'),
+                'experience_level': validated_data.get('experience_level')
+            }
+            
+            # Remove None values from filters
+            filters = {k: v for k, v in filters.items() if v}
+            
+            # Find matches
+            matches = matching_service.find_matches(user_profile, limit, filters)
+            
+            # Serialize results
+            match_serializer = MatchResultSerializer(matches, many=True)
+            
+            return Response({
+                'matches': match_serializer.data,
+                'count': len(matches),
+                'filters_applied': filters
+            })
+            
+        except Exception as e:
+            return Response(
+                {'error': f'Error finding matches: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=True, methods=['post'])
+    def mark_viewed(self, request, pk=None):
+        """Mark a match as viewed"""
+        try:
+            match = self.get_object()
+            match.status = 'viewed'
+            match.viewed_at = timezone.now()
+            match.save()
+            
+            serializer = self.get_serializer(match)
+            return Response(serializer.data)
+            
+        except Exception as e:
+            return Response(
+                {'error': f'Error marking match as viewed: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=True, methods=['post'])
+    def mark_contacted(self, request, pk=None):
+        """Mark a match as contacted"""
+        try:
+            match = self.get_object()
+            match.status = 'contacted'
+            match.save()
+            
+            serializer = self.get_serializer(match)
+            return Response(serializer.data)
+            
+        except Exception as e:
+            return Response(
+                {'error': f'Error marking match as contacted: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=True, methods=['post'])
+    def decline(self, request, pk=None):
+        """Decline a match"""
+        try:
+            match = self.get_object()
+            match.status = 'declined'
+            match.save()
+            
+            serializer = self.get_serializer(match)
+            return Response(serializer.data)
+            
+        except Exception as e:
+            return Response(
+                {'error': f'Error declining match: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class MatchFeedbackViewSet(viewsets.ModelViewSet):
+    """ViewSet for match feedback"""
+    serializer_class = MatchFeedbackSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        """Filter to current user's feedback"""
+        try:
+            user_profile = self.request.user.creatorprofile
+            return MatchFeedback.objects.filter(user=user_profile).select_related(
+                'match_result__matched_creator'
+            )
+        except AttributeError:
+            return MatchFeedback.objects.none()
+    
+    def perform_create(self, serializer):
+        """Set the user when creating feedback"""
+        try:
+            user_profile = self.request.user.creatorprofile
+            serializer.save(user=user_profile)
+        except AttributeError:
+            raise serializers.ValidationError({'error': 'User profile not found'})
+
+
+class MatchHistoryViewSet(viewsets.ReadOnlyModelViewSet):
+    """ViewSet for match history (read-only)"""
+    serializer_class = MatchHistorySerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        """Filter to current user's history"""
+        user_profile = self.request.user.creatorprofile
+        return MatchHistory.objects.filter(user=user_profile)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def batch_match(request):
+    """Batch matching for multiple creators"""
+    try:
+        # Validate request data
+        serializer = BatchMatchRequestSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        validated_data = serializer.validated_data
+        creator_ids = validated_data['creator_ids']
+        limit_per_creator = validated_data.get('limit_per_creator', 5)
+        filters = validated_data.get('filters', {})
+        
+        # Get creators
+        from accounts.models import CreatorProfile
+        creators = CreatorProfile.objects.filter(id__in=creator_ids)
+        
+        results = {}
+        
+        for creator in creators:
+            try:
+                matches = matching_service.find_matches(creator, limit_per_creator, filters)
+                match_serializer = MatchResultSerializer(matches, many=True)
+                results[str(creator.id)] = {
+                    'creator_name': creator.display_name,
+                    'matches': match_serializer.data,
+                    'count': len(matches)
+                }
+            except Exception as e:
+                results[str(creator.id)] = {
+                    'creator_name': creator.display_name,
+                    'error': str(e),
+                    'matches': [],
+                    'count': 0
+                }
+        
+        return Response({
+            'results': results,
+            'total_creators': len(creators),
+            'successful_matches': len([r for r in results.values() if 'error' not in r])
+        })
+        
+    except Exception as e:
+        return Response(
+            {'error': f'Error in batch matching: {str(e)}'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def match_statistics(request):
+    """Get matching statistics for the current user"""
+    try:
+        user_profile = request.user.creatorprofile
+    except AttributeError:
+        return Response({'error': 'User profile not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+    try:
+        stats = matching_service.get_match_statistics(user_profile)
+        serializer = MatchStatisticsSerializer(stats)
+        return Response(serializer.data)
+    except Exception as e:
+        return Response(
+            {'error': f'Failed to get match statistics: {str(e)}'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

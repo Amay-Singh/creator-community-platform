@@ -366,3 +366,201 @@ class UserUsageTracking(models.Model):
     
     def __str__(self):
         return f"{self.user.display_name} - {self.usage_type} - {self.date}"
+
+
+# ============================================================================
+# P5-001: AI-Powered Creator Matching Models
+# ============================================================================
+
+class CreatorEmbedding(models.Model):
+    """
+    Store vector embeddings for creator profiles to enable AI-powered matching
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    creator = models.OneToOneField(CreatorProfile, on_delete=models.CASCADE, related_name='embedding')
+    
+    # Vector embedding data
+    embedding_vector = models.JSONField(help_text="Vector representation of creator profile")
+    embedding_version = models.CharField(max_length=50, default='v1.0')
+    
+    # Source data for embedding generation
+    skills_hash = models.CharField(max_length=64, help_text="Hash of skills data used")
+    bio_hash = models.CharField(max_length=64, help_text="Hash of bio data used")
+    interests_hash = models.CharField(max_length=64, help_text="Hash of interests data used")
+    
+    # Metadata
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    last_profile_update = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        db_table = 'creator_embeddings'
+        ordering = ['-updated_at']
+        indexes = [
+            models.Index(fields=['creator']),
+            models.Index(fields=['embedding_version']),
+            models.Index(fields=['updated_at']),
+        ]
+    
+    def __str__(self):
+        return f"Embedding for {self.creator.display_name}"
+    
+    @property
+    def needs_update(self):
+        """Check if embedding needs to be regenerated"""
+        if not self.last_profile_update:
+            return True
+        return self.creator.updated_at > self.last_profile_update
+
+
+class MatchResult(models.Model):
+    """
+    Store AI-generated matches between creators
+    """
+    MATCH_STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('viewed', 'Viewed'),
+        ('interested', 'Interested'),
+        ('contacted', 'Contacted'),
+        ('declined', 'Declined'),
+        ('expired', 'Expired'),
+    ]
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    requester = models.ForeignKey(CreatorProfile, on_delete=models.CASCADE, related_name='match_requests')
+    matched_creator = models.ForeignKey(CreatorProfile, on_delete=models.CASCADE, related_name='received_matches')
+    
+    # Matching scores and metadata
+    similarity_score = models.FloatField(help_text="Cosine similarity score (0-1)")
+    compatibility_score = models.FloatField(help_text="Overall compatibility score (0-100)")
+    
+    # Match reasoning and explanation
+    match_reasons = models.JSONField(default=list, help_text="List of reasons for the match")
+    shared_skills = models.JSONField(default=list, help_text="Skills in common")
+    complementary_skills = models.JSONField(default=list, help_text="Complementary skills")
+    
+    # Match context
+    match_type = models.CharField(max_length=50, default='general', help_text="Type of match (collaboration, mentorship, etc.)")
+    match_filters = models.JSONField(default=dict, help_text="Filters used for matching")
+    
+    # Status and interaction
+    status = models.CharField(max_length=20, choices=MATCH_STATUS_CHOICES, default='pending')
+    viewed_at = models.DateTimeField(null=True, blank=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
+    
+    # Metadata
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'match_results'
+        ordering = ['-compatibility_score', '-created_at']
+        unique_together = ['requester', 'matched_creator', 'created_at']
+        indexes = [
+            models.Index(fields=['requester', 'status']),
+            models.Index(fields=['matched_creator', 'status']),
+            models.Index(fields=['similarity_score']),
+            models.Index(fields=['compatibility_score']),
+            models.Index(fields=['created_at']),
+            models.Index(fields=['expires_at']),
+        ]
+    
+    def __str__(self):
+        return f"Match: {self.requester.display_name} → {self.matched_creator.display_name} ({self.compatibility_score}%)"
+
+
+class MatchFeedback(models.Model):
+    """
+    User feedback on match quality for algorithm improvement
+    """
+    FEEDBACK_CHOICES = [
+        (1, 'Very Poor'),
+        (2, 'Poor'),
+        (3, 'Average'),
+        (4, 'Good'),
+        (5, 'Excellent'),
+    ]
+    
+    FEEDBACK_TYPES = [
+        ('quality', 'Match Quality'),
+        ('relevance', 'Relevance'),
+        ('accuracy', 'Accuracy'),
+        ('usefulness', 'Usefulness'),
+    ]
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    match_result = models.ForeignKey(MatchResult, on_delete=models.CASCADE, related_name='feedback')
+    user = models.ForeignKey(CreatorProfile, on_delete=models.CASCADE)
+    
+    # Feedback data
+    rating = models.PositiveSmallIntegerField(choices=FEEDBACK_CHOICES)
+    feedback_type = models.CharField(max_length=20, choices=FEEDBACK_TYPES, default='quality')
+    comment = models.TextField(blank=True, help_text="Optional feedback comment")
+    
+    # Interaction outcome
+    contacted_match = models.BooleanField(default=False)
+    collaboration_started = models.BooleanField(default=False)
+    would_recommend = models.BooleanField(null=True, blank=True)
+    
+    # Metadata
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        db_table = 'match_feedback'
+        ordering = ['-created_at']
+        unique_together = ['match_result', 'user', 'feedback_type']
+        indexes = [
+            models.Index(fields=['match_result']),
+            models.Index(fields=['user']),
+            models.Index(fields=['rating']),
+            models.Index(fields=['created_at']),
+        ]
+    
+    def __str__(self):
+        return f"Feedback: {self.match_result} - {self.rating}/5"
+
+
+class MatchHistory(models.Model):
+    """
+    Track matching requests and history for analytics
+    """
+    REQUEST_TYPES = [
+        ('find_matches', 'Find Matches'),
+        ('batch_match', 'Batch Match'),
+        ('similar_creators', 'Similar Creators'),
+        ('collaboration_match', 'Collaboration Match'),
+    ]
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(CreatorProfile, on_delete=models.CASCADE, related_name='match_history')
+    
+    # Request details
+    request_type = models.CharField(max_length=30, choices=REQUEST_TYPES)
+    filters_used = models.JSONField(default=dict, help_text="Filters applied to the search")
+    results_count = models.PositiveIntegerField(default=0)
+    
+    # Performance metrics
+    processing_time_ms = models.PositiveIntegerField(help_text="Processing time in milliseconds")
+    embedding_version = models.CharField(max_length=50, default='v1.0')
+    
+    # Results summary
+    top_similarity_score = models.FloatField(null=True, blank=True)
+    average_compatibility = models.FloatField(null=True, blank=True)
+    matches_viewed = models.PositiveIntegerField(default=0)
+    matches_contacted = models.PositiveIntegerField(default=0)
+    
+    # Metadata
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        db_table = 'match_history'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', 'created_at']),
+            models.Index(fields=['request_type']),
+            models.Index(fields=['processing_time_ms']),
+            models.Index(fields=['created_at']),
+        ]
+    
+    def __str__(self):
+        return f"Match History: {self.user.display_name} - {self.request_type} ({self.results_count} results)"
