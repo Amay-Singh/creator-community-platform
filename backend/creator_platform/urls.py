@@ -40,6 +40,7 @@ urlpatterns = [
     path('api/chat/', include('chat.urls')),
     path('api/analytics/', include('analytics.urls')),
     path('api/security/', include('security.urls')),
+    path('api/integrations/', include('integrations.urls')),
     path('api/feed/', notification_views.activity_feed, name='activity-feed'),
 ]
 

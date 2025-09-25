@@ -42,4 +42,9 @@ urlpatterns = [
     
     # Health check
     path('health/', views.ai_services_health, name='ai_services_health'),
+    
+    # Phase 9: Advanced AI Features
+    path('advanced-matching/', views.advanced_ai_matching, name='advanced_ai_matching'),
+    path('recommendations/', views.ai_recommendations, name='ai_recommendations'),
+    path('generate-advanced/', views.generate_advanced_content, name='generate_advanced_content'),
 ]

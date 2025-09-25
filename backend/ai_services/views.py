@@ -27,8 +27,10 @@ from .serializers import (
     MatchFeedbackSerializer, MatchHistorySerializer, MatchRequestSerializer, BatchMatchRequestSerializer,
     MatchStatisticsSerializer
 )
-from .content_generation_service import content_generation_service
-from .matching_service import matching_service
+from .content_generator import ContentGenerator
+from .matching_service import MatchingService
+from .advanced_matching import advanced_matching_engine
+from .recommendation_engine import recommendation_engine
 
 
 @api_view(['POST'])
@@ -705,3 +707,149 @@ def match_statistics(request):
             {'error': f'Failed to get match statistics: {str(e)}'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def advanced_ai_matching(request):
+    """Advanced AI matching with ML algorithms"""
+    try:
+        limit = request.data.get('limit', 20)
+        filters = request.data.get('filters', {})
+        
+        # Initialize advanced matching engine
+        if not advanced_matching_engine.sentence_model:
+            advanced_matching_engine.initialize_models()
+        
+        # Find advanced matches
+        matches = advanced_matching_engine.find_advanced_matches(
+            user=request.user,
+            limit=limit,
+            filters=filters
+        )
+        
+        # Serialize results
+        serialized_matches = []
+        for match in matches:
+            serialized_matches.append({
+                'user_id': match.matched_user.id,
+                'username': match.matched_user.username,
+                'match_score': match.match_score,
+                'algorithm_version': match.algorithm_version,
+                'metadata': match.metadata,
+                'created_at': match.created_at
+            })
+        
+        return Response({
+            'matches': serialized_matches,
+            'algorithm': 'advanced_ml_v1',
+            'total_found': len(matches)
+        })
+        
+    except Exception as e:
+        return Response({
+            'error': 'Advanced matching failed',
+            'details': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def ai_recommendations(request):
+    """Get AI-powered recommendations"""
+    try:
+        recommendation_type = request.data.get('type', 'projects')
+        limit = request.data.get('limit', 10)
+        context = request.data.get('context', {})
+        
+        # Initialize recommendation engine
+        if not recommendation_engine.tfidf_vectorizer:
+            recommendation_engine.initialize_models()
+        
+        recommendations = []
+        
+        if recommendation_type == 'projects':
+            recommendations = recommendation_engine.get_project_recommendations(
+                user=request.user,
+                limit=limit
+            )
+        elif recommendation_type == 'collaborators':
+            recommendations = recommendation_engine.get_collaborator_recommendations(
+                user=request.user,
+                project_context=context.get('project'),
+                limit=limit
+            )
+        elif recommendation_type == 'skills':
+            recommendations = recommendation_engine.get_skill_recommendations(
+                user=request.user,
+                limit=limit
+            )
+        elif recommendation_type == 'content':
+            content_type = context.get('content_type', 'all')
+            recommendations = recommendation_engine.get_content_recommendations(
+                user=request.user,
+                content_type=content_type,
+                limit=limit
+            )
+        
+        return Response({
+            'recommendations': recommendations,
+            'type': recommendation_type,
+            'total_found': len(recommendations)
+        })
+        
+    except Exception as e:
+        return Response({
+            'error': 'Recommendation generation failed',
+            'details': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def generate_advanced_content(request):
+    """Generate advanced AI content"""
+    try:
+        content_type = request.data.get('type')
+        content_data = request.data.get('data', {})
+        
+        result = {}
+        
+        if content_type == 'marketing_copy':
+            product_info = content_data.get('product_info', {})
+            target_audience = content_data.get('target_audience', 'general')
+            result = ContentGenerator.generate_marketing_copy(product_info, target_audience)
+            
+        elif content_type == 'social_media_strategy':
+            creator_profile = content_data.get('creator_profile', {})
+            goals = content_data.get('goals', [])
+            result = ContentGenerator.generate_social_media_strategy(creator_profile, goals)
+            
+        elif content_type == 'course_outline':
+            topic = content_data.get('topic', '')
+            skill_level = content_data.get('skill_level', 'beginner')
+            duration = content_data.get('duration', '4 weeks')
+            result = ContentGenerator.generate_course_outline(topic, skill_level, duration)
+            
+        elif content_type == 'pitch_deck':
+            business_idea = content_data.get('business_idea', {})
+            result = ContentGenerator.generate_pitch_deck(business_idea)
+            
+        elif content_type == 'contract_template':
+            collaboration_type = content_data.get('collaboration_type', 'general')
+            project_details = content_data.get('project_details', {})
+            result = ContentGenerator.generate_contract_template(collaboration_type, project_details)
+            
+        else:
+            return Response({
+                'error': 'Invalid content type',
+                'supported_types': ['marketing_copy', 'social_media_strategy', 'course_outline', 'pitch_deck', 'contract_template']
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response(result)
+        
+    except Exception as e:
+        return Response({
+            'error': 'Content generation failed',
+            'details': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

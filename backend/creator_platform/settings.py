@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "notifications",
     "analytics",
     "security",
+    "integrations",
     "axes",
     "debug_toolbar",
 ]
@@ -324,3 +325,32 @@ VALID_API_KEYS = os.environ.get("VALID_API_KEYS", "").split(",")
 TOTP_ISSUER_NAME = "Creator Community Platform"
 BACKUP_CODE_LENGTH = 8
 BACKUP_CODE_COUNT = 10
+
+# --- External Integrations Configuration (Phase 9)
+# LinkedIn Integration
+LINKEDIN_CLIENT_ID = os.environ.get("LINKEDIN_CLIENT_ID", "")
+LINKEDIN_CLIENT_SECRET = os.environ.get("LINKEDIN_CLIENT_SECRET", "")
+LINKEDIN_REDIRECT_URI = os.environ.get("LINKEDIN_REDIRECT_URI", "")
+
+# GitHub Integration
+GITHUB_CLIENT_ID = os.environ.get("GITHUB_CLIENT_ID", "")
+GITHUB_CLIENT_SECRET = os.environ.get("GITHUB_CLIENT_SECRET", "")
+GITHUB_REDIRECT_URI = os.environ.get("GITHUB_REDIRECT_URI", "")
+
+# Twitter/X Integration
+TWITTER_API_KEY = os.environ.get("TWITTER_API_KEY", "")
+TWITTER_API_SECRET = os.environ.get("TWITTER_API_SECRET", "")
+TWITTER_BEARER_TOKEN = os.environ.get("TWITTER_BEARER_TOKEN", "")
+
+# Google Calendar Integration
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
+GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
+GOOGLE_REDIRECT_URI = os.environ.get("GOOGLE_REDIRECT_URI", "")
+
+# Stripe Payment Integration
+STRIPE_PUBLISHABLE_KEY = os.environ.get("STRIPE_PUBLISHABLE_KEY", "")
+STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "")
+STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
+
+# OpenAI API (for advanced content generation)
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
