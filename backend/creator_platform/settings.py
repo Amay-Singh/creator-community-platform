@@ -273,10 +273,8 @@ if DEBUG:
 # --- Performance Settings
 # Database connection pooling and optimization
 DATABASES['default']['CONN_MAX_AGE'] = 60  # Keep connections alive for 60 seconds
-DATABASES['default']['OPTIONS'] = {
-    **DATABASES['default'].get('OPTIONS', {}),
-    'MAX_CONNS': 20,  # Maximum number of connections
-}
+# Note: Connection pooling is handled by Django's CONN_MAX_AGE setting
+# MAX_CONNS is not a valid PostgreSQL connection parameter
 
 # Cache timeout settings
 CACHE_TTL = 60 * 15  # 15 minutes default cache timeout
