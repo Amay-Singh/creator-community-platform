@@ -2,6 +2,7 @@
 URL patterns for subscription and payment system
 """
 from django.urls import path
+from django.http import JsonResponse
 from .subscription_views import (
     SubscriptionPlansView, UserSubscriptionView, CreateSubscriptionView,
     PremiumAddonsView, PurchaseAddonView, cancel_subscription,
@@ -9,9 +10,24 @@ from .subscription_views import (
     subscription_analytics, increment_feature_usage
 )
 
+def subscription_health(request):
+    """Subscription service health check"""
+    return JsonResponse({
+        'status': 'healthy',
+        'service': 'subscriptions',
+        'endpoints': {
+            'plans': '/api/subscriptions/plans/',
+            'current': '/api/subscriptions/current/',
+            'create': '/api/subscriptions/create/'
+        }
+    })
+
 app_name = 'subscription'
 
 urlpatterns = [
+    # Health endpoint
+    path('health/', subscription_health, name='subscription_health'),
+    
     # Subscription plans and management
     path('plans/', SubscriptionPlansView.as_view(), name='plans'),
     path('current/', UserSubscriptionView.as_view(), name='current'),

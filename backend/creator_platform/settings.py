@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "video_collaboration",
     "enterprise",
     "globalization",  # Re-enabled for Phase 10
+    # "subscriptions",  # Temporarily disabled due to model conflicts
     "axes",
     "debug_toolbar",
 ]

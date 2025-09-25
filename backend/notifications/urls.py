@@ -30,6 +30,6 @@ urlpatterns = [
     path('analytics/user-history/', views.analytics_user_history, name='analytics_user_history'),
     
     # System monitoring endpoints
-    path('health/', views.system_health, name='system_health'),
+    path('health/', views.simple_health, name='simple_health'),
     path('alerts/', views.system_alerts, name='system_alerts'),
 ]

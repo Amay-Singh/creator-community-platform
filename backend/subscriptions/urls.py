@@ -2,9 +2,25 @@
 Subscription URL patterns
 """
 from django.urls import path
+from django.http import JsonResponse
 from . import views
 
+def subscription_health(request):
+    """Subscription service health check"""
+    return JsonResponse({
+        'status': 'healthy',
+        'service': 'subscriptions',
+        'endpoints': {
+            'plans': '/api/subscriptions/plans/',
+            'user_subscription': '/api/subscriptions/me/',
+            'usage': '/api/subscriptions/usage/'
+        }
+    })
+
 urlpatterns = [
+    # Health endpoint
+    path('health/', subscription_health, name='subscription_health'),
+    
     # Subscription plans
     path('plans/', views.SubscriptionPlansView.as_view(), name='subscription-plans'),
     

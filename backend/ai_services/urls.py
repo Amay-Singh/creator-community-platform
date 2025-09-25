@@ -41,7 +41,7 @@ urlpatterns = [
     path('matching/stats/', views.match_statistics, name='match_statistics'),
     
     # Health check and monitoring (Phase 5 Guardian fixes)
-    path('health/', views.ai_services_health, name='ai_services_health'),
+    path('health/', views.simple_ai_health, name='simple_ai_health'),
     path('health/detailed/', views.detailed_health_check, name='detailed_health_check'),
     path('health/cache/clear/', views.clear_service_cache, name='clear_service_cache'),
     

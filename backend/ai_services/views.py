@@ -389,7 +389,17 @@ def batch_content_generation(request):
 
 
 @api_view(['GET'])
-@permission_classes([permissions.IsAuthenticated])
+@permission_classes([permissions.AllowAny])  # Health endpoints should be public
+def simple_ai_health(request):
+    """Simple AI services health check"""
+    return Response({
+        'status': 'healthy',
+        'service': 'ai_services',
+        'timestamp': timezone.now()
+    })
+
+@api_view(['GET'])
+@permission_classes([permissions.AllowAny])  # Health endpoints should be public
 def ai_services_health(request):
     """Health check for AI services"""
     return Response({

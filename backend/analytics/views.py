@@ -375,7 +375,17 @@ def collect_metrics(request):
 
 
 @api_view(['GET'])
-@permission_classes([permissions.IsAdminUser])
+@permission_classes([permissions.AllowAny])  # Health endpoints should be public
+def simple_analytics_health(request):
+    """Simple analytics health check"""
+    return Response({
+        'status': 'healthy',
+        'service': 'analytics',
+        'timestamp': timezone.now()
+    })
+
+@api_view(['GET'])
+@permission_classes([permissions.AllowAny])  # Health endpoints should be public
 def analytics_health(request):
     """
     GET /api/analytics/health

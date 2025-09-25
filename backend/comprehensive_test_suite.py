@@ -92,11 +92,10 @@ class CreatorPlatformTestSuite:
                 "username": "testuser",
                 "email": "test@example.com",
                 "password": "TestPass123!",
-                "first_name": "Test",
-                "last_name": "User"
+                "password_confirm": "TestPass123!"
             }, 201, "User registration"),
             ("POST", "/api/auth/login/", {
-                "username": "testuser",
+                "email": "test@example.com",
                 "password": "TestPass123!"
             }, 200, "User login"),
             ("GET", "/api/auth/profile/", None, 401, "Profile access (no auth)"),

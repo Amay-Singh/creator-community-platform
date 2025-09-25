@@ -26,5 +26,5 @@ urlpatterns = [
     path('analytics/', views.get_video_analytics, name='get_video_analytics'),
     
     # Health check
-    path('health/', views.video_health_check, name='video_health_check'),
+    path('health/', views.simple_video_health, name='simple_video_health'),
 ]

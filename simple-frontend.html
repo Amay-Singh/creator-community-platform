@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creator Community Platform - Phase 10 Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-blue-600 mb-2">Creator Community Platform</h1>
+            <p class="text-gray-600">Phase 10: Platform Maturity & Global Scale</p>
+            <div id="health-status" class="mt-4"></div>
+        </header>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Languages Section -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">🌐 Languages</h2>
+                <button onclick="loadLanguages()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mb-4">
+                    Load Languages
+                </button>
+                <div id="languages-list" class="space-y-2"></div>
+            </div>
+
+            <!-- Currency Converter -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">💱 Currency Converter</h2>
+                <div class="space-y-3">
+                    <input type="number" id="amount" placeholder="Amount" class="w-full p-2 border rounded" value="100">
+                    <select id="from-currency" class="w-full p-2 border rounded">
+                        <option value="USD">USD</option>
+                        <option value="EUR">EUR</option>
+                        <option value="GBP">GBP</option>
+                        <option value="JPY">JPY</option>
+                    </select>
+                    <select id="to-currency" class="w-full p-2 border rounded">
+                        <option value="EUR">EUR</option>
+                        <option value="USD">USD</option>
+                        <option value="GBP">GBP</option>
+                        <option value="JPY">JPY</option>
+                    </select>
+                    <button onclick="convertCurrency()" class="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600">
+                        Convert
+                    </button>
+                    <div id="conversion-result" class="text-lg font-semibold text-green-600"></div>
+                </div>
+            </div>
+
+            <!-- Auto Translator -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">🔤 Auto Translator</h2>
+                <div class="space-y-3">
+                    <textarea id="translate-text" placeholder="Enter text to translate" class="w-full p-2 border rounded h-20">Hello World</textarea>
+                    <select id="target-language" class="w-full p-2 border rounded">
+                        <option value="es">Spanish</option>
+                        <option value="fr">French</option>
+                        <option value="de">German</option>
+                        <option value="zh">Chinese</option>
+                        <option value="ja">Japanese</option>
+                    </select>
+                    <button onclick="translateText()" class="w-full bg-purple-500 text-white py-2 rounded hover:bg-purple-600">
+                        Translate
+                    </button>
+                    <div id="translation-result" class="p-3 bg-gray-100 rounded min-h-[60px]"></div>
+                </div>
+            </div>
+
+            <!-- Popular Languages -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">🔥 Popular Languages</h2>
+                <button onclick="loadPopularLanguages()" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 mb-4">
+                    Load Popular
+                </button>
+                <div id="popular-languages" class="space-y-2"></div>
+            </div>
+
+            <!-- Exchange Rates -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">📊 Exchange Rates</h2>
+                <button onclick="loadExchangeRates()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 mb-4">
+                    Load Rates
+                </button>
+                <div id="exchange-rates" class="space-y-2"></div>
+            </div>
+
+            <!-- Health Check -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">🏥 System Health</h2>
+                <button onclick="checkHealth()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 mb-4">
+                    Check Health
+                </button>
+                <div id="health-details" class="space-y-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://127.0.0.1:8000/api/globalization';
+
+        async function apiCall(endpoint, options = {}) {
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    },
+                    ...options
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('API Error:', error);
+                return { error: error.message };
+            }
+        }
+
+        async function loadLanguages() {
+            const result = await apiCall('/languages/');
+            const container = document.getElementById('languages-list');
+            
+            if (result.error) {
+                container.innerHTML = `<div class="text-red-500">Error: ${result.error}</div>`;
+                return;
+            }
+            
+            container.innerHTML = result.slice(0, 5).map(lang => 
+                `<div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                    <span class="font-medium">${lang.name}</span>
+                    <span class="text-sm text-gray-500">${lang.native_name}</span>
+                </div>`
+            ).join('');
+        }
+
+        async function convertCurrency() {
+            const amount = document.getElementById('amount').value;
+            const from = document.getElementById('from-currency').value;
+            const to = document.getElementById('to-currency').value;
+            
+            const result = await apiCall('/currencies/convert/', {
+                method: 'POST',
+                body: JSON.stringify({ amount: parseFloat(amount), from, to })
+            });
+            
+            const container = document.getElementById('conversion-result');
+            
+            if (result.error) {
+                container.innerHTML = `<div class="text-red-500">Error: ${result.error}</div>`;
+                return;
+            }
+            
+            container.innerHTML = `${amount} ${from} = ${result.converted_amount} ${to}`;
+        }
+
+        async function translateText() {
+            const text = document.getElementById('translate-text').value;
+            const targetLanguage = document.getElementById('target-language').value;
+            
+            const result = await apiCall('/translations/auto_translate/', {
+                method: 'POST',
+                body: JSON.stringify({ text, target_language: targetLanguage })
+            });
+            
+            const container = document.getElementById('translation-result');
+            
+            if (result.error) {
+                container.innerHTML = `<div class="text-red-500">Error: ${result.error}</div>`;
+                return;
+            }
+            
+            container.innerHTML = `<strong>Original:</strong> ${result.original_text}<br><strong>Translated:</strong> ${result.translated_text}`;
+        }
+
+        async function loadPopularLanguages() {
+            const result = await apiCall('/languages/popular/');
+            const container = document.getElementById('popular-languages');
+            
+            if (result.error) {
+                container.innerHTML = `<div class="text-red-500">Error: ${result.error}</div>`;
+                return;
+            }
+            
+            container.innerHTML = result.slice(0, 5).map(lang => 
+                `<div class="flex justify-between items-center p-2 bg-orange-50 rounded">
+                    <span class="font-medium">${lang.name}</span>
+                    <span class="text-sm text-gray-500">${lang.users} users</span>
+                </div>`
+            ).join('');
+        }
+
+        async function loadExchangeRates() {
+            const result = await apiCall('/currencies/rates/');
+            const container = document.getElementById('exchange-rates');
+            
+            if (result.error) {
+                container.innerHTML = `<div class="text-red-500">Error: ${result.error}</div>`;
+                return;
+            }
+            
+            const rates = Object.entries(result.rates || {});
+            container.innerHTML = rates.length ? rates.map(([currency, rate]) => 
+                `<div class="flex justify-between items-center p-2 bg-indigo-50 rounded">
+                    <span class="font-medium">1 ${result.base} =</span>
+                    <span class="text-sm">${rate} ${currency}</span>
+                </div>`
+            ).join('') : '<div class="text-gray-500">No rates available</div>';
+        }
+
+        async function checkHealth() {
+            const result = await apiCall('/health/');
+            const container = document.getElementById('health-details');
+            const statusContainer = document.getElementById('health-status');
+            
+            if (result.error) {
+                container.innerHTML = `<div class="text-red-500">Error: ${result.error}</div>`;
+                statusContainer.innerHTML = `<span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm">❌ System Error</span>`;
+                return;
+            }
+            
+            const isHealthy = result.status === 'healthy';
+            statusContainer.innerHTML = `<span class="bg-${isHealthy ? 'green' : 'red'}-100 text-${isHealthy ? 'green' : 'red'}-800 px-3 py-1 rounded-full text-sm">${isHealthy ? '✅' : '❌'} ${result.status}</span>`;
+            
+            container.innerHTML = Object.entries(result.services || {}).map(([service, details]) => 
+                `<div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                    <span class="font-medium capitalize">${service}</span>
+                    <span class="text-sm ${details.status === 'healthy' ? 'text-green-600' : 'text-red-600'}">${details.status}</span>
+                </div>`
+            ).join('');
+        }
+
+        // Auto-load health status on page load
+        checkHealth();
+    </script>
+</body>
+</html>

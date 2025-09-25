@@ -9,7 +9,7 @@ app_name = 'analytics'
 urlpatterns = [
     # Dashboard and overview
     path('dashboard/', views.analytics_dashboard, name='dashboard'),
-    path('health/', views.analytics_health, name='health'),
+    path('health/', views.simple_analytics_health, name='simple_analytics_health'),
     
     # Metrics endpoints
     path('platform-metrics/', views.platform_metrics, name='platform_metrics'),

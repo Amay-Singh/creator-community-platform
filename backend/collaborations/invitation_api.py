@@ -3,12 +3,13 @@ Collaboration Invitation API Views for Creator Community Platform
 Implements P5-003: COLL-001 REST API endpoints
 """
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 
 User = get_user_model()
 from django.core.cache import cache
@@ -590,6 +591,17 @@ def use_template(request, template_id):
 
 
 @api_view(['GET'])
+@permission_classes([AllowAny])  # Health endpoints should be public
+def simple_invite_health(request):
+    """Simple invitation health check"""
+    return Response({
+        'status': 'healthy',
+        'service': 'collaboration_invites',
+        'timestamp': timezone.now()
+    })
+
+@api_view(['GET'])
+@permission_classes([AllowAny])  # Health endpoints should be public
 def invite_health(request):
     """
     Health check for invitation system

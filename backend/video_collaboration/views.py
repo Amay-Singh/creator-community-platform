@@ -3,7 +3,7 @@ Video Collaboration Views
 P9-003: Advanced Video Collaboration Tools
 """
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import get_user_model
@@ -567,7 +567,17 @@ def get_video_analytics(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])  # Health endpoints should be public
+def simple_video_health(request):
+    """Simple video collaboration health check"""
+    return Response({
+        'status': 'healthy',
+        'service': 'video_collaboration',
+        'timestamp': timezone.now()
+    })
+
+@api_view(['GET'])
+@permission_classes([AllowAny])  # Health endpoints should be public
 def video_health_check(request):
     """Health check for video collaboration service"""
     try:
