@@ -34,3 +34,4 @@ frontend/.env*
 
 # Starter AI prompt structure v3 - development files
 starter_ai_prompt_structure_v3/
+starter_ai_prompt_structure_v3_complete/
