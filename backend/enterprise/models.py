@@ -209,7 +209,7 @@ class Team(models.Model):
     
     # Team lead
     lead = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='led_teams')
-    members = models.ManyToManyField(User, through='TeamMembership', related_name='teams')
+    members = models.ManyToManyField(User, through='TeamMembership', related_name='teams', through_fields=('team', 'user'))
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

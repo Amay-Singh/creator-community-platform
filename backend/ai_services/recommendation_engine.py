@@ -12,8 +12,8 @@ from django.core.cache import cache
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from datetime import timedelta
-from .models import CreatorProfile, MatchingResult, SearchQuery
-from collaborations.models import NewCollaborationInvite
+from .models import CreatorProfile, MatchResult
+from collaborations.models import CollaborationInvite
 from notifications.models import Notification
 from analytics.services import AnalyticsCollector
 
