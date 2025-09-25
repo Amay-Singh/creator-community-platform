@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     "analytics",
     "security",
     "integrations",
+    "video_collaboration",
+    "enterprise",
     "axes",
     "debug_toolbar",
 ]
