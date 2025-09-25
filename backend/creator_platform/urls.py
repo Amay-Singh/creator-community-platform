@@ -35,15 +35,16 @@ urlpatterns = [
     path('api/auth/', include('accounts.simple_urls')),
     path('api/accounts/', include('accounts.simple_urls')),
     path('api/notifications/', include('notifications.urls')),
-    path('api/ai/', include('ai_services.urls')),
+    path('api/ai_services/', include('ai_services.urls')),  # Fixed URL path
     path('api/collaborations/', include('collaborations.urls')),
     path('api/chat/', include('chat.urls')),
     path('api/analytics/', include('analytics.urls')),
     path('api/security/', include('security.urls')),
     path('api/integrations/', include('integrations.urls')),
-    path('api/video/', include('video_collaboration.urls')),
+    path('api/video_collaboration/', include('video_collaboration.urls')),  # Fixed URL path
     path('api/enterprise/', include('enterprise.urls')),
-    path('api/feed/', notification_views.activity_feed, name='activity-feed'),
+    path('api/globalization/', include('globalization.urls')),  # Added missing globalization
+    path('api/activity/', notification_views.activity_feed, name='activity-feed'),  # Fixed path
 ]
 
 if settings.DEBUG:
