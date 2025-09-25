@@ -40,8 +40,10 @@ urlpatterns = [
     path('matching/batch/', views.batch_match, name='batch_match'),
     path('matching/stats/', views.match_statistics, name='match_statistics'),
     
-    # Health check
+    # Health check and monitoring (Phase 5 Guardian fixes)
     path('health/', views.ai_services_health, name='ai_services_health'),
+    path('health/detailed/', views.detailed_health_check, name='detailed_health_check'),
+    path('health/cache/clear/', views.clear_service_cache, name='clear_service_cache'),
     
     # Phase 9: Advanced AI Features
     path('advanced-matching/', views.advanced_ai_matching, name='advanced_ai_matching'),

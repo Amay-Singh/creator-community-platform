@@ -6,8 +6,8 @@ from rest_framework import generics, permissions, status, viewsets
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework import status, viewsets
-from django.http import JsonResponse
+from django.shortcuts import render
+from .health_monitoring import health_check, detailed_health_check, clear_service_cache
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.views import View

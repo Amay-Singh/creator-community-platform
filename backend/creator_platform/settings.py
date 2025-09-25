@@ -49,6 +49,10 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    # AI Services middleware (Phase 5 Guardian fixes)
+    "ai_services.middleware.AIServiceRateLimitMiddleware",
+    "ai_services.middleware.AIServiceMonitoringMiddleware",
+    "ai_services.middleware.SecurityHeadersMiddleware",
     # Security middleware
     "security.middleware.DDoSProtectionMiddleware",
     "security.middleware.RateLimitMiddleware",
