@@ -10,8 +10,8 @@ from .models import (
     NotificationAnalytics, RealtimeAnalytics, AnalyticsEvent
 )
 from notifications.models import Notification
-from ai_services.models import MatchingResult
-from collaborations.models import NewCollaborationInvite
+from ai_services.models import MatchResult
+from collaborations.models import CollaborationInvite
 import logging
 
 User = get_user_model()

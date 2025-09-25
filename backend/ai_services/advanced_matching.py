@@ -14,7 +14,7 @@ import logging
 from django.core.cache import cache
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from .models import CreatorProfile, MatchingResult, SearchQuery
+from .models import CreatorProfile, MatchResult, SearchQuery
 from analytics.services import AnalyticsCollector
 import os
 

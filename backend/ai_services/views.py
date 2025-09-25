@@ -28,7 +28,7 @@ from .serializers import (
     MatchStatisticsSerializer
 )
 from .content_generator import ContentGenerator
-from .matching_service import MatchingService
+from .matching_service import AIMatchingService
 from .advanced_matching import advanced_matching_engine
 from .recommendation_engine import recommendation_engine
 
