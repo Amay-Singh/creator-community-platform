@@ -32,6 +32,12 @@ Agent_Prompts.json
 backend/.env*
 frontend/.env*
 
-# Starter AI prompt structure v3 - development files
+# Starter AI prompt structure files - development files
 starter_ai_prompt_structure_v3/
 starter_ai_prompt_structure_v3_complete/
+starter_ai_prompt_structure_v4_nonstop/
+starter_ai_prompt_structure_v4_nonstop_with_spinup2/
+starter_ai_prompt_structure_v4_complete/
+
+# Windsurf IDE files
+.windsurf/
