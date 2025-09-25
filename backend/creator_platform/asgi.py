@@ -19,9 +19,14 @@ django.setup()
 
 from chat.routing import websocket_urlpatterns as chat_websocket_urlpatterns
 from notifications.routing import websocket_urlpatterns as notification_websocket_urlpatterns
+from analytics.routing import websocket_urlpatterns as analytics_websocket_urlpatterns
 
 # Combine all WebSocket URL patterns
-all_websocket_urlpatterns = chat_websocket_urlpatterns + notification_websocket_urlpatterns
+all_websocket_urlpatterns = (
+    chat_websocket_urlpatterns + 
+    notification_websocket_urlpatterns + 
+    analytics_websocket_urlpatterns
+)
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),

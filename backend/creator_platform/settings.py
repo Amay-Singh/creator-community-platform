@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "chat",
     "collaborations",
     "notifications",
+    "analytics",
     "debug_toolbar",
 ]
 
