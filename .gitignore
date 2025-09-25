@@ -31,3 +31,6 @@ Agent_Prompts.json
 # Environment files
 backend/.env*
 frontend/.env*
+
+# Starter AI prompt structure v3 - development files
+starter_ai_prompt_structure_v3/
