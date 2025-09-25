@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     "collaborations",
     "notifications",
     "analytics",
+    "security",
+    "axes",
     "debug_toolbar",
 ]
 
@@ -44,6 +46,11 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    # Security middleware
+    "security.middleware.DDoSProtectionMiddleware",
+    "security.middleware.RateLimitMiddleware",
+    "security.middleware.SecurityHeadersMiddleware",
+    "security.middleware.RequestLoggingMiddleware",
     # WhiteNoise to serve collected static files in UAT/PROD
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
@@ -53,6 +60,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "axes.middleware.AxesMiddleware",
     "utils.middleware.ActiveUsersMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -270,3 +278,49 @@ CACHE_TTL = 60 * 15  # 15 minutes default cache timeout
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "default"
 SESSION_COOKIE_AGE = 86400  # 24 hours
+
+# --- Security Configuration
+# Django Axes (brute force protection)
+AXES_FAILURE_LIMIT = 5
+AXES_COOLOFF_TIME = 1  # 1 hour
+AXES_LOCKOUT_CALLABLE = 'axes.lockout.database_lockout'
+AXES_RESET_ON_SUCCESS = True
+AXES_ENABLE_ADMIN = True
+
+# Content Security Policy
+CSP_DEFAULT_SRC = ("'self'",)
+CSP_SCRIPT_SRC = ("'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net")
+CSP_STYLE_SRC = ("'self'", "'unsafe-inline'", "https://fonts.googleapis.com")
+CSP_FONT_SRC = ("'self'", "https://fonts.gstatic.com")
+CSP_IMG_SRC = ("'self'", "data:", "https:")
+CSP_CONNECT_SRC = ("'self'", "wss:", "ws:")
+CSP_FRAME_ANCESTORS = ("'none'",)
+CSP_BASE_URI = ("'self'",)
+CSP_FORM_ACTION = ("'self'",)
+
+# Security settings
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
+# Cookie security
+SESSION_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SAMESITE = 'Lax'
+
+# Additional security settings
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin'
+
+# API Keys for external services (set via environment variables)
+VALID_API_KEYS = os.environ.get("VALID_API_KEYS", "").split(",")
+
+# Two-Factor Authentication settings
+TOTP_ISSUER_NAME = "Creator Community Platform"
+BACKUP_CODE_LENGTH = 8
+BACKUP_CODE_COUNT = 10

@@ -1,30 +1,58 @@
-// Service Worker for Push Notifications
-const CACHE_NAME = 'creator-platform-v1';
-const urlsToCache = [
+// Service Worker for PWA and Push Notifications
+const CACHE_NAME = 'creator-platform-v2';
+const STATIC_CACHE = 'static-v2';
+const DYNAMIC_CACHE = 'dynamic-v2';
+
+// Static assets to cache
+const STATIC_ASSETS = [
   '/',
+  '/offline',
   '/static/icons/notification-icon.png',
-  '/static/icons/badge-icon.png'
+  '/static/icons/badge-icon.png',
+  '/icons/icon-192x192.png',
+  '/icons/icon-512x512.png',
+  '/manifest.json'
+];
+
+// API endpoints to cache
+const API_CACHE_PATTERNS = [
+  '/api/notifications/',
+  '/api/ai/matches/',
+  '/api/collaborations/invites/'
 ];
 
 // Install event
 self.addEventListener('install', (event) => {
+  console.log('Service Worker installing...');
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(urlsToCache))
+    Promise.all([
+      caches.open(STATIC_CACHE).then((cache) => cache.addAll(STATIC_ASSETS)),
+      caches.open(DYNAMIC_CACHE).then(() => console.log('Dynamic cache opened'))
+    ]).then(() => {
+      console.log('Service Worker installed successfully');
+      self.skipWaiting();
+    })
   );
 });
 
 // Activate event
 self.addEventListener('activate', (event) => {
+  console.log('Service Worker activating...');
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
+    Promise.all([
+      caches.keys().then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            if (![STATIC_CACHE, DYNAMIC_CACHE].includes(cacheName)) {
+              console.log('Deleting old cache:', cacheName);
+              return caches.delete(cacheName);
+            }
+          })
+        );
+      }),
+      clients.claim()
+    ]).then(() => {
+      console.log('Service Worker activated successfully');
     })
   );
 });
@@ -175,18 +203,92 @@ self.addEventListener('message', (event) => {
   }
 });
 
-// Fetch event - handle network requests
+// Fetch event - handle network requests with offline support
 self.addEventListener('fetch', (event) => {
-  // Only handle GET requests for caching
-  if (event.request.method !== 'GET') {
+  const { request } = event;
+  const url = new URL(request.url);
+  
+  // Skip non-GET requests and chrome-extension requests
+  if (request.method !== 'GET' || url.protocol === 'chrome-extension:') {
     return;
   }
-  
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Return cached version or fetch from network
-        return response || fetch(event.request);
-      })
-  );
+
+  // Handle API requests with cache-first strategy for specific endpoints
+  if (url.pathname.startsWith('/api/')) {
+    const shouldCache = API_CACHE_PATTERNS.some(pattern => 
+      url.pathname.startsWith(pattern)
+    );
+    
+    if (shouldCache) {
+      event.respondWith(handleAPIRequest(request));
+    }
+    return;
+  }
+
+  // Handle navigation requests
+  if (request.mode === 'navigate') {
+    event.respondWith(handleNavigationRequest(request));
+    return;
+  }
+
+  // Handle static assets
+  event.respondWith(handleStaticRequest(request));
 });
+
+// Handle API requests with network-first strategy
+async function handleAPIRequest(request) {
+  try {
+    const networkResponse = await fetch(request);
+    if (networkResponse.ok) {
+      const cache = await caches.open(DYNAMIC_CACHE);
+      cache.put(request, networkResponse.clone());
+    }
+    return networkResponse;
+  } catch (error) {
+    console.log('Network failed, trying cache:', error);
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+    // Return offline response for API requests
+    return new Response(JSON.stringify({
+      error: 'Offline',
+      message: 'This content is not available offline'
+    }), {
+      status: 503,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+}
+
+// Handle navigation requests with cache-first strategy
+async function handleNavigationRequest(request) {
+  try {
+    const networkResponse = await fetch(request);
+    return networkResponse;
+  } catch (error) {
+    console.log('Navigation failed, serving offline page:', error);
+    const cachedResponse = await caches.match('/offline');
+    return cachedResponse || new Response('Offline', { status: 503 });
+  }
+}
+
+// Handle static assets with cache-first strategy
+async function handleStaticRequest(request) {
+  const cachedResponse = await caches.match(request);
+  if (cachedResponse) {
+    return cachedResponse;
+  }
+
+  try {
+    const networkResponse = await fetch(request);
+    if (networkResponse.ok) {
+      const cache = await caches.open(DYNAMIC_CACHE);
+      cache.put(request, networkResponse.clone());
+    }
+    return networkResponse;
+  } catch (error) {
+    console.log('Static asset failed to load:', error);
+    return new Response('Resource not available offline', { status: 503 });
+  }
+}

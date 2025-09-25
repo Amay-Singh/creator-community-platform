@@ -39,6 +39,7 @@ urlpatterns = [
     path('api/collaborations/', include('collaborations.urls')),
     path('api/chat/', include('chat.urls')),
     path('api/analytics/', include('analytics.urls')),
+    path('api/security/', include('security.urls')),
     path('api/feed/', notification_views.activity_feed, name='activity-feed'),
 ]
 
