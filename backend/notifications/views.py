@@ -12,6 +12,7 @@ from .models import Notification, MatchNotification, NotificationSubscription
 from .services import NotificationService, MatchNotificationService
 from .push_service import push_service
 from .analytics import NotificationAnalytics, NotificationMonitor
+from utils.cache import CacheManager, cache_result, CACHE_TIMEOUT_SHORT
 import json
 
 logger = logging.getLogger(__name__)
@@ -33,8 +34,15 @@ def notifications_list(request):
     try:
         user = request.user
         status_filter = request.query_params.get('status', 'all')
+        page_num = request.query_params.get('page', 1)
         
-        queryset = Notification.objects.filter(user=user)
+        # Try to get from cache first
+        cached_data = CacheManager.get_notifications(user.id, page_num)
+        if cached_data and status_filter == 'all':
+            logger.info(f"notif_list_cache_hit user_id={user.id} page={page_num}")
+            return Response(cached_data)
+        
+        queryset = Notification.objects.filter(user=user).select_related('user').order_by('-created_at')
         
         if status_filter == 'unread':
             queryset = queryset.filter(read_at__isnull=True)
@@ -44,8 +52,14 @@ def notifications_list(request):
         
         if page is not None:
             serializer = NotificationSerializer(page, many=True)
+            response_data = paginator.get_paginated_response(serializer.data).data
+            
+            # Cache the response for 'all' status filter
+            if status_filter == 'all':
+                CacheManager.set_notifications(user.id, response_data, page_num, CACHE_TIMEOUT_SHORT)
+            
             logger.info(f"notif_list_viewed user_id={user.id} status={status_filter} count={len(page)}")
-            return paginator.get_paginated_response(serializer.data)
+            return Response(response_data)
         
         serializer = NotificationSerializer(queryset, many=True)
         logger.info(f"notif_list_viewed user_id={user.id} status={status_filter} count={queryset.count()}")
@@ -83,6 +97,9 @@ def mark_notifications_read(request):
                 read_at__isnull=True
             ).update(read_at=now)
             
+            # Invalidate notification cache
+            CacheManager.invalidate_user_notifications(user.id)
+            
             logger.info(f"notif_read user_id={user.id} action=mark_all count={updated_count}")
             return Response({
                 'success': True, 
@@ -98,6 +115,9 @@ def mark_notifications_read(request):
                 id__in=notification_ids,
                 read_at__isnull=True
             ).update(read_at=now)
+            
+            # Invalidate notification cache
+            CacheManager.invalidate_user_notifications(user.id)
             
             logger.info(f"notif_read user_id={user.id} action=mark_specific ids={notification_ids} count={updated_count}")
             return Response({

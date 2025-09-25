@@ -4,6 +4,9 @@ Django settings for Creator Community Platform
 import os
 from pathlib import Path
 import dj_database_url
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+from sentry_sdk.integrations.redis import RedisIntegration
 
 # --- Paths
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -33,6 +36,7 @@ INSTALLED_APPS = [
     "chat",
     "collaborations",
     "notifications",
+    "debug_toolbar",
 ]
 
 # --- Middleware
@@ -41,10 +45,14 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     # WhiteNoise to serve collected static files in UAT/PROD
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
+    "utils.middleware.PerformanceMonitoringMiddleware",
+    "utils.middleware.CacheHitRateMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "utils.middleware.ActiveUsersMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -218,3 +226,46 @@ CACHES = {
         }
     }
 }
+
+# --- Performance Monitoring & Error Tracking
+# Sentry Configuration
+SENTRY_DSN = os.environ.get("SENTRY_DSN")
+if SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[
+            DjangoIntegration(
+                transaction_style='url',
+                middleware_spans=True,
+                signals_spans=True,
+            ),
+            RedisIntegration(),
+        ],
+        traces_sample_rate=0.1,  # Capture 10% of transactions for performance monitoring
+        send_default_pii=False,  # Don't send personally identifiable information
+        environment=os.environ.get("ENVIRONMENT", "development"),
+        release=os.environ.get("GIT_SHA", "unknown"),
+    )
+
+# Debug Toolbar Configuration (only in DEBUG mode)
+if DEBUG:
+    INTERNAL_IPS = [
+        "127.0.0.1",
+        "localhost",
+    ]
+
+# --- Performance Settings
+# Database connection pooling and optimization
+DATABASES['default']['CONN_MAX_AGE'] = 60  # Keep connections alive for 60 seconds
+DATABASES['default']['OPTIONS'] = {
+    **DATABASES['default'].get('OPTIONS', {}),
+    'MAX_CONNS': 20,  # Maximum number of connections
+}
+
+# Cache timeout settings
+CACHE_TTL = 60 * 15  # 15 minutes default cache timeout
+
+# Session configuration for performance
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
+SESSION_COOKIE_AGE = 86400  # 24 hours
