@@ -7,7 +7,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 from .models import CustomUser, CreatorProfile, PortfolioItem, ProfileFeedback
 from .authentication import ApprovalCode
-from ai_services.models import ProfileFeedback as AIProfileFeedback
+# from ai_services.models import ProfileFeedback as AIProfileFeedback  # Temporarily disabled
 import random
 import string
 
@@ -163,7 +163,7 @@ class ProfileFeedbackCreateSerializer(serializers.ModelSerializer):
     """Create profile feedback serializer (REQ-16)"""
     
     class Meta:
-        model = AIProfileFeedback
+        model = ProfileFeedback  # Using local ProfileFeedback model
         fields = ['feedback_type', 'rating', 'comment', 'is_anonymous']
     
     def validate_rating(self, value):

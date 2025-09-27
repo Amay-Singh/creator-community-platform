@@ -1,10 +1,24 @@
 """
-Django settings for Creator Community Platform
+Django settings for creator_platform project.
 """
-import os
 from pathlib import Path
+import os
 import dj_database_url
+from dotenv import load_dotenv
+import sys
 
+# Load appropriate .env file based on environment
+if 'runserver' in sys.argv or 'shell' in sys.argv:
+    # Development
+    load_dotenv()
+else:
+    # Production/CI - try production env first, fallback to default
+    load_dotenv('.env.production')
+    load_dotenv()  # Fallback to .env if .env.production doesn't exist
+
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+from sentry_sdk.integrations.redis import RedisIntegration
 # --- Paths
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -33,18 +47,40 @@ INSTALLED_APPS = [
     "chat",
     "collaborations",
     "notifications",
+    "analytics",
+    "security",
+    "integrations",
+    "video_collaboration",
+    "enterprise",
+    "globalization",  # Re-enabled for Phase 10
+    # "subscriptions",  # Temporarily disabled due to model conflicts
+    "axes",
+    "debug_toolbar",
 ]
 
 # --- Middleware
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    # Temporarily disable problematic middleware
+    # "ai_services.middleware.AIServiceRateLimitMiddleware",
+    # "ai_services.middleware.AIServiceMonitoringMiddleware", 
+    # "ai_services.middleware.SecurityHeadersMiddleware",
+    # "security.middleware.DDoSProtectionMiddleware",
+    # "security.middleware.RateLimitMiddleware",
+    # "security.middleware.SecurityHeadersMiddleware",
+    # "security.middleware.RequestLoggingMiddleware",
     # WhiteNoise to serve collected static files in UAT/PROD
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    # "debug_toolbar.middleware.DebugToolbarMiddleware",
+    # "utils.middleware.PerformanceMonitoringMiddleware",
+    # "utils.middleware.CacheHitRateMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "axes.middleware.AxesMiddleware",
+    # "utils.middleware.ActiveUsersMiddleware",  # Temporarily disabled
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -88,12 +124,50 @@ if DATABASES["default"]["ENGINE"].endswith("postgresql") and os.environ.get("DAT
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
 SUPABASE_ANON_KEY = os.environ.get("SUPABASE_ANON_KEY", "")
 
-# --- Cache (simple local cache)
+# --- Cache (Redis Cloud Configuration with SSL)
+import ssl
+import certifi
+
+REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
+
+# Redis Cloud SSL configuration (handle missing Redis gracefully)
+try:
+    if REDIS_URL and REDIS_URL.startswith('rediss://'):
+        REDIS_CONNECTION_KWARGS = {
+            "ssl_cert_reqs": ssl.CERT_REQUIRED,
+            "ssl_ca_certs": certifi.where(),
+            "ssl_check_hostname": False,
+            "health_check_interval": 30,
+            "socket_connect_timeout": 5,
+            "socket_timeout": 5,
+            "retry_on_timeout": True,
+        }
+    else:
+        REDIS_CONNECTION_KWARGS = {
+            "retry_on_timeout": True,
+        }
+except Exception:
+    # Fallback if Redis configuration fails
+    REDIS_CONNECTION_KWARGS = {
+        "retry_on_timeout": True,
+    }
+
 CACHES = {
     "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": REDIS_URL,
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "CONNECTION_POOL_KWARGS": REDIS_CONNECTION_KWARGS,
+        },
+        "KEY_PREFIX": "creator_platform",
+        "TIMEOUT": 300,  # 5 minutes default
     }
 }
+
+# Use Redis for sessions as well
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
 
 # --- DRF
 REST_FRAMEWORK = {
@@ -218,3 +292,119 @@ CACHES = {
         }
     }
 }
+
+# --- Performance Monitoring & Error Tracking
+# Sentry Configuration
+SENTRY_DSN = os.environ.get("SENTRY_DSN")
+if SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[
+            DjangoIntegration(
+                transaction_style='url',
+                middleware_spans=True,
+                signals_spans=True,
+            ),
+            RedisIntegration(),
+        ],
+        traces_sample_rate=0.1,  # Capture 10% of transactions for performance monitoring
+        send_default_pii=False,  # Don't send personally identifiable information
+        environment=os.environ.get("ENVIRONMENT", "development"),
+        release=os.environ.get("GIT_SHA", "unknown"),
+    )
+
+# Debug Toolbar Configuration (only in DEBUG mode)
+if DEBUG:
+    INTERNAL_IPS = [
+        "127.0.0.1",
+        "localhost",
+    ]
+
+# --- Performance Settings
+# Database connection pooling and optimization
+DATABASES['default']['CONN_MAX_AGE'] = 60  # Keep connections alive for 60 seconds
+# Note: Connection pooling is handled by Django's CONN_MAX_AGE setting
+# MAX_CONNS is not a valid PostgreSQL connection parameter
+
+# Cache timeout settings
+CACHE_TTL = 60 * 15  # 15 minutes default cache timeout
+
+# Session configuration for performance
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
+SESSION_COOKIE_AGE = 86400  # 24 hours
+
+# --- Security Configuration
+# Django Axes (brute force protection)
+AXES_FAILURE_LIMIT = 5
+AXES_COOLOFF_TIME = 1  # 1 hour
+AXES_LOCKOUT_CALLABLE = 'axes.lockout.database_lockout'
+AXES_RESET_ON_SUCCESS = True
+AXES_ENABLE_ADMIN = True
+
+# Content Security Policy
+CSP_DEFAULT_SRC = ("'self'",)
+CSP_SCRIPT_SRC = ("'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net")
+CSP_STYLE_SRC = ("'self'", "'unsafe-inline'", "https://fonts.googleapis.com")
+CSP_FONT_SRC = ("'self'", "https://fonts.gstatic.com")
+CSP_IMG_SRC = ("'self'", "data:", "https:")
+CSP_CONNECT_SRC = ("'self'", "wss:", "ws:")
+CSP_FRAME_ANCESTORS = ("'none'",)
+CSP_BASE_URI = ("'self'",)
+CSP_FORM_ACTION = ("'self'",)
+
+# Security settings
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
+# Cookie security
+SESSION_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SAMESITE = 'Lax'
+
+# Additional security settings
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin'
+
+# API Keys for external services (set via environment variables)
+VALID_API_KEYS = os.environ.get("VALID_API_KEYS", "").split(",")
+
+# Two-Factor Authentication settings
+TOTP_ISSUER_NAME = "Creator Community Platform"
+BACKUP_CODE_LENGTH = 8
+BACKUP_CODE_COUNT = 10
+
+# --- External Integrations Configuration (Phase 9)
+# LinkedIn Integration
+LINKEDIN_CLIENT_ID = os.environ.get("LINKEDIN_CLIENT_ID", "")
+LINKEDIN_CLIENT_SECRET = os.environ.get("LINKEDIN_CLIENT_SECRET", "")
+LINKEDIN_REDIRECT_URI = os.environ.get("LINKEDIN_REDIRECT_URI", "")
+
+# GitHub Integration
+GITHUB_CLIENT_ID = os.environ.get("GITHUB_CLIENT_ID", "")
+GITHUB_CLIENT_SECRET = os.environ.get("GITHUB_CLIENT_SECRET", "")
+GITHUB_REDIRECT_URI = os.environ.get("GITHUB_REDIRECT_URI", "")
+
+# Twitter/X Integration
+TWITTER_API_KEY = os.environ.get("TWITTER_API_KEY", "")
+TWITTER_API_SECRET = os.environ.get("TWITTER_API_SECRET", "")
+TWITTER_BEARER_TOKEN = os.environ.get("TWITTER_BEARER_TOKEN", "")
+
+# Google Calendar Integration
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
+GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
+GOOGLE_REDIRECT_URI = os.environ.get("GOOGLE_REDIRECT_URI", "")
+
+# Stripe Payment Integration
+STRIPE_PUBLISHABLE_KEY = os.environ.get("STRIPE_PUBLISHABLE_KEY", "")
+STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "")
+STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
+
+# OpenAI API (for advanced content generation)
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")

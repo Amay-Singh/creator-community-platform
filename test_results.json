@@ -1,0 +1,685 @@
+{
+  "total_tests": 32,
+  "passed": 31,
+  "failed": 1,
+  "phases": {
+    "1": {
+      "phase": 1,
+      "name": "Authentication",
+      "tests": [
+        {
+          "endpoint": "/api/auth/health/",
+          "method": "GET",
+          "status": 200,
+          "expected": 200,
+          "success": true,
+          "description": "Auth service health check",
+          "response_time": 9.586095809936523,
+          "data": {
+            "status": "healthy",
+            "service": "authentication",
+            "endpoints": {
+              "register": "/api/auth/register/",
+              "login": "/api/auth/login/",
+              "profile": "/api/auth/profile/"
+            }
+          }
+        },
+        {
+          "endpoint": "/api/auth/register/",
+          "method": "POST",
+          "status": 201,
+          "expected": 201,
+          "success": true,
+          "description": "User registration",
+          "response_time": 612.0700836181641,
+          "data": {
+            "user": {
+              "id": "2d426969-dfca-495b-96c6-81a91c2c0d9e",
+              "username": "testuser",
+              "email": "test@example.com"
+            },
+            "token": "abb7c28579788ade0ce84453becd1940487725c3",
+            "message": "User already exists, returning existing user"
+          }
+        },
+        {
+          "endpoint": "/api/auth/login/",
+          "method": "POST",
+          "status": 200,
+          "expected": 200,
+          "success": true,
+          "description": "User login",
+          "response_time": 235.92615127563477,
+          "data": {
+            "user": {
+              "id": "2d426969-dfca-495b-96c6-81a91c2c0d9e",
+              "username": "testuser",
+              "email": "test@example.com"
+            },
+            "token": "abb7c28579788ade0ce84453becd1940487725c3"
+          }
+        },
+        {
+          "endpoint": "/api/auth/profile/",
+          "method": "GET",
+          "status": 401,
+          "expected": 401,
+          "success": true,
+          "description": "Profile access (no auth)",
+          "response_time": 1.146078109741211,
+          "data": {
+            "error": "Authentication required"
+          }
+        }
+      ]
+    },
+    "2": {
+      "phase": 2,
+      "name": "Creator Profiles",
+      "tests": [
+        {
+          "endpoint": "/api/accounts/profiles/",
+          "method": "GET",
+          "status": 200,
+          "expected": 200,
+          "success": true,
+          "description": "List creator profiles",
+          "response_time": 0.7441043853759766,
+          "data": {
+            "profiles": [],
+            "count": 0,
+            "message": "Profiles endpoint operational"
+          }
+        },
+        {
+          "endpoint": "/api/accounts/profile/health/",
+          "method": "GET",
+          "status": 200,
+          "expected": 200,
+          "success": true,
+          "description": "Profile service health",
+          "response_time": 0.5669593811035156,
+          "data": {
+            "status": "healthy",
+            "service": "profiles",
+            "endpoints": {
+              "profiles": "/api/accounts/profiles/",
+              "dashboard": "/api/accounts/dashboard/"
+            }
+          }
+        },
+        {
+          "endpoint": "/api/accounts/profiles/",
+          "method": "POST",
+          "status": 401,
+          "expected": 401,
+          "success": true,
+          "description": "Create profile (no auth)",
+          "response_time": 0.6000995635986328,
+          "data": {
+            "error": "Authentication required"
+          }
+        }
+      ]
+    },
+    "3": {
+      "phase": 3,
+      "name": "Notifications",
+      "tests": [
+        {
+          "endpoint": "/api/notifications/",
+          "method": "GET",
+          "status": 401,
+          "expected": 401,
+          "success": true,
+          "description": "List notifications (no auth)",
+          "response_time": 1.110076904296875,
+          "data": {
+            "detail": "Authentication credentials were not provided."
+          }
+        },
+        {
+          "endpoint": "/api/notifications/health/",
+          "method": "GET",
+          "status": 200,
+          "expected": 200,
+          "success": true,
+          "description": "Notifications health check",
+          "response_time": 201.19404792785645,
+          "data": {
+            "status": "healthy",
+            "service": "notifications",
+            "redis_connected": false,
+            "features": {
+              "push_notifications": true,
+              "email_notifications": true,
+              "real_time_updates": true
+            },
+            "timestamp": "2025-09-27T00:42:53.538632+00:00"
+          }
+        },
+        {
+          "endpoint": "/api/activity/feed/",
+          "method": "GET",
+          "status": 401,
+          "expected": 401,
+          "success": true,
+          "description": "Activity feed (no auth)",
+          "response_time": 1.2857913970947266,
+          "data": {
+            "detail": "Authentication credentials were not provided."
+          }
+        }
+      ]
+    },
+    "4": {
+      "phase": 4,
+      "name": "UI/UX Enhancement",
+      "tests": [
+        {
+          "endpoint": "http://localhost:3001",
+          "method": "GET",
+          "status": "ERROR",
+          "expected": 200,
+          "success": false,
+          "description": "Frontend accessibility",
+          "response_time": 0
+        }
+      ]
+    },
+    "5": {
+      "phase": 5,
+      "name": "AI Collaboration",
+      "tests": [
+        {
+          "endpoint": "/api/ai_services/health/",
+          "method": "GET",
+          "status": 200,
+          "expected": 200,
+          "success": true,
+          "description": "AI services health check",
+          "response_time": 1.210927963256836,
+          "data": {
+            "status": "healthy",
+            "service": "ai_services",
+            "gemini_configured": true,
+            "timestamp": "2025-09-27T00:42:53.595180+00:00"
+          }
+        },
+        {
+          "endpoint": "/api/collaborations/invites/health/",
+          "method": "GET",
+          "status": 200,
+          "expected": 200,
+          "success": true,
+          "description": "Collaboration invites health",
+          "response_time": 108.97088050842285,
+          "data": {
+            "status": "healthy",
+            "service": "collaboration_invites",
+            "redis_connected": false,
+            "sendgrid_configured": true,
+            "features": {
+              "invite_system": true,
+              "email_invites": true,
+              "rate_limiting": true,
+              "caching": true,
+              "templates": true
+            },
+            "endpoints": {
+              "send": "/api/collaborations/invites/send/",
+              "sent": "/api/collaborations/invites/sent/",
+              "received": "/api/collaborations/invites/received/"
+            },
+            "timestamp": "2025-09-27T00:42:53.703959+00:00"
+          }
+        },
+        {
+          "endpoint": "/api/collaborations/invites/sent/",
+          "method": "GET",
+          "status": 401,
+          "expected": 401,
+          "success": true,
+          "description": "Sent invites (no auth)",
+          "response_time": 4.556894302368164,
+          "data": {
+            "detail": "Authentication credentials were not provided."
+          }
+        },
+        {
+          "endpoint": "/api/collaborations/invites/received/",
+          "method": "GET",
+          "status": 401,
+          "expected": 401,
+          "success": true,
+          "description": "Received invites (no auth)",
+          "response_time": 8.051872253417969,
+          "data": {
+            "detail": "Authentication credentials were not provided."
+          }
+        }
+      ]
+    },
+    "6": {
+      "phase": 6,
+      "name": "Real-time Messaging",
+      "tests": [
+        {
+          "endpoint": "/api/chat/health/",
+          "method": "GET",
+          "status": 200,
+          "expected": 200,
+          "success": true,
+          "description": "Chat service health check",
+          "response_time": 16.155004501342773,
+          "data": {
+            "status": "healthy",
+            "service": "chat",
+            "endpoints": {
+              "conversations": "/api/chat/conversations/",
+              "rooms": "/api/chat/rooms/",
+              "presence": "/api/chat/presence/"
+            }
+          }
+        },
+        {
+          "endpoint": "/api/chat/conversations/",
+          "method": "GET",
+          "status": 401,
+          "expected": 401,
+          "success": true,
+          "description": "List conversations (no auth)",
+          "response_time": 1.783132553100586,
+          "data": {
+            "error": "Authentication required"
+          }
+        }
+      ]
+    },
+    "7": {
+      "phase": 7,
+      "name": "Project Management",
+      "tests": [
+        {
+          "endpoint": "/api/collaborations/projects/",
+          "method": "GET",
+          "status": 401,
+          "expected": 401,
+          "success": true,
+          "description": "List projects (no auth)",
+          "response_time": 6.644248962402344,
+          "data": {
+            "error": "Authentication required"
+          }
+        },
+        {
+          "endpoint": "/api/video_collaboration/health/",
+          "method": "GET",
+          "status": 200,
+          "expected": 200,
+          "success": true,
+          "description": "Video collaboration health",
+          "response_time": 21.823883056640625,
+          "data": {
+            "status": "healthy",
+            "service": "video_collaboration",
+            "agora_configured": true,
+            "features": {
+              "video_calling": true,
+              "screen_sharing": true,
+              "recording": true,
+              "real_time_messaging": true
+            },
+            "limits": {
+              "monthly_minutes": 10000,
+              "max_participants_per_room": 17
+            },
+            "stats": {
+              "total_rooms_created": 89,
+              "active_rooms": 12,
+              "total_participants": 234,
+              "minutes_used_this_month": 1456,
+              "minutes_remaining": 8544,
+              "popular_features": [
+                {
+                  "name": "Screen Sharing",
+                  "usage": "87%"
+                },
+                {
+                  "name": "Video Calls",
+                  "usage": "92%"
+                },
+                {
+                  "name": "Recording",
+                  "usage": "34%"
+                },
+                {
+                  "name": "Chat",
+                  "usage": "78%"
+                }
+              ],
+              "average_session_duration": "23 minutes",
+              "success_rate": "98.7%"
+            },
+            "endpoints": {
+              "create_room": "/api/video_collaboration/create/",
+              "join_room": "/api/video_collaboration/join/",
+              "rooms": "/api/video_collaboration/rooms/"
+            },
+            "timestamp": "2025-09-27T00:42:53.759516+00:00"
+          }
+        }
+      ]
+    },
+    "8": {
+      "phase": 8,
+      "name": "Monetization",
+      "tests": [
+        {
+          "endpoint": "/api/subscriptions/health/",
+          "method": "GET",
+          "status": 200,
+          "expected": 200,
+          "success": true,
+          "description": "Subscription service health",
+          "response_time": 7.5969696044921875,
+          "data": {
+            "status": "healthy",
+            "service": "subscriptions",
+            "endpoints": {
+              "plans": "/api/subscriptions/plans/",
+              "current": "/api/subscriptions/current/",
+              "create": "/api/subscriptions/create/"
+            }
+          }
+        },
+        {
+          "endpoint": "/api/subscriptions/plans/",
+          "method": "GET",
+          "status": 200,
+          "expected": 200,
+          "success": true,
+          "description": "List subscription plans",
+          "response_time": 6.560087203979492,
+          "data": {
+            "plans": [
+              {
+                "id": 1,
+                "name": "Basic",
+                "price": 9.99
+              },
+              {
+                "id": 2,
+                "name": "Pro",
+                "price": 19.99
+              },
+              {
+                "id": 3,
+                "name": "Enterprise",
+                "price": 49.99
+              }
+            ],
+            "count": 3,
+            "message": "Subscription plans endpoint operational"
+          }
+        }
+      ]
+    },
+    "9": {
+      "phase": 9,
+      "name": "Analytics",
+      "tests": [
+        {
+          "endpoint": "/api/analytics/health/",
+          "method": "GET",
+          "status": 200,
+          "expected": 200,
+          "success": true,
+          "description": "Analytics service health",
+          "response_time": 197.40891456604004,
+          "data": {
+            "status": "healthy",
+            "service": "analytics",
+            "ga4_configured": true,
+            "features": {
+              "event_tracking": true,
+              "user_analytics": true,
+              "real_time_data": true,
+              "custom_events": true
+            },
+            "analytics_summary": {
+              "total_users": 1250,
+              "active_users_today": 89,
+              "collaborations_created": 156,
+              "ai_matches_generated": 423,
+              "success_rate": "92.3%",
+              "top_features": [
+                {
+                  "name": "AI Matching",
+                  "usage": "78%"
+                },
+                {
+                  "name": "Collaboration Invites",
+                  "usage": "65%"
+                },
+                {
+                  "name": "Real-time Chat",
+                  "usage": "54%"
+                },
+                {
+                  "name": "Project Management",
+                  "usage": "43%"
+                }
+              ],
+              "user_growth": "+23% this month",
+              "engagement_score": 8.7
+            },
+            "endpoints": {
+              "dashboard": "/api/analytics/dashboard/",
+              "events": "/api/analytics/events/",
+              "reports": "/api/analytics/reports/"
+            },
+            "timestamp": "2025-09-27T00:42:53.988231+00:00"
+          }
+        },
+        {
+          "endpoint": "/api/analytics/dashboard/",
+          "method": "GET",
+          "status": 401,
+          "expected": 401,
+          "success": true,
+          "description": "Analytics dashboard (no auth)",
+          "response_time": 1.232147216796875,
+          "data": {
+            "detail": "Authentication credentials were not provided."
+          }
+        }
+      ]
+    },
+    "10": {
+      "phase": 10,
+      "name": "Globalization",
+      "tests": [
+        {
+          "endpoint": "/api/globalization/health/",
+          "method": "GET",
+          "status": 200,
+          "expected": 200,
+          "success": true,
+          "description": "Globalization health check",
+          "response_time": 0.7538795471191406,
+          "data": {
+            "status": "healthy",
+            "service": "globalization",
+            "endpoints": {
+              "languages": "/api/globalization/languages/",
+              "currencies": "/api/globalization/currencies/",
+              "translations": "/api/globalization/translations/"
+            }
+          }
+        },
+        {
+          "endpoint": "/api/globalization/languages/",
+          "method": "GET",
+          "status": 200,
+          "expected": 200,
+          "success": true,
+          "description": "List languages",
+          "response_time": 0.6539821624755859,
+          "data": {
+            "languages": [
+              {
+                "code": "en",
+                "name": "English",
+                "native_name": "English"
+              },
+              {
+                "code": "es",
+                "name": "Spanish",
+                "native_name": "Espa\u00f1ol"
+              },
+              {
+                "code": "fr",
+                "name": "French",
+                "native_name": "Fran\u00e7ais"
+              }
+            ],
+            "count": 3
+          }
+        },
+        {
+          "endpoint": "/api/globalization/languages/popular/",
+          "method": "GET",
+          "status": 200,
+          "expected": 200,
+          "success": true,
+          "description": "Popular languages",
+          "response_time": 0.6148815155029297,
+          "data": {
+            "popular_languages": [
+              {
+                "code": "en",
+                "name": "English",
+                "usage_percentage": 60
+              },
+              {
+                "code": "es",
+                "name": "Spanish",
+                "usage_percentage": 25
+              }
+            ]
+          }
+        },
+        {
+          "endpoint": "/api/globalization/currencies/",
+          "method": "GET",
+          "status": 200,
+          "expected": 200,
+          "success": true,
+          "description": "List currencies",
+          "response_time": 0.5888938903808594,
+          "data": {
+            "currencies": [
+              {
+                "code": "USD",
+                "name": "US Dollar",
+                "symbol": "$"
+              },
+              {
+                "code": "EUR",
+                "name": "Euro",
+                "symbol": "\u20ac"
+              }
+            ],
+            "count": 2
+          }
+        },
+        {
+          "endpoint": "/api/globalization/currencies/rates/",
+          "method": "GET",
+          "status": 200,
+          "expected": 200,
+          "success": true,
+          "description": "Exchange rates",
+          "response_time": 0.6527900695800781,
+          "data": {
+            "base_currency": "USD",
+            "rates": {
+              "EUR": 0.85,
+              "GBP": 0.73
+            },
+            "last_updated": "2025-09-25T22:00:00Z"
+          }
+        },
+        {
+          "endpoint": "/api/globalization/currencies/convert/",
+          "method": "POST",
+          "status": 200,
+          "expected": 200,
+          "success": true,
+          "description": "Currency conversion",
+          "response_time": 0.6279945373535156,
+          "data": {
+            "from_currency": "USD",
+            "to_currency": "EUR",
+            "amount": 100,
+            "converted_amount": 85.0,
+            "rate": 0.85
+          }
+        },
+        {
+          "endpoint": "/api/globalization/translations/",
+          "method": "GET",
+          "status": 200,
+          "expected": 200,
+          "success": true,
+          "description": "List translations",
+          "response_time": 0.5710124969482422,
+          "data": {
+            "translations": [],
+            "count": 0,
+            "message": "Translations endpoint operational"
+          }
+        },
+        {
+          "endpoint": "/api/globalization/translations/bulk/?keys=hello,world&language=en",
+          "method": "GET",
+          "status": 200,
+          "expected": 200,
+          "success": true,
+          "description": "Bulk translations",
+          "response_time": 0.6258487701416016,
+          "data": {
+            "translations": {
+              "hello": "Hello",
+              "world": "World"
+            },
+            "language": "en"
+          }
+        },
+        {
+          "endpoint": "/api/globalization/translations/auto_translate/",
+          "method": "POST",
+          "status": 200,
+          "expected": 200,
+          "success": true,
+          "description": "Auto translation",
+          "response_time": 0.6542205810546875,
+          "data": {
+            "original_text": "Hello World",
+            "translated_text": "Hola Mundo",
+            "source_language": "en",
+            "target_language": "es"
+          }
+        }
+      ]
+    }
+  },
+  "critical_failures": [
+    "Phase 4: Frontend not accessible"
+  ],
+  "performance_metrics": {
+    "total_execution_time": 1.5197389125823975
+  }
+}

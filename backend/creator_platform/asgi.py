@@ -17,14 +17,25 @@ from channels.security.websocket import AllowedHostsOriginValidator
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'creator_platform.settings')
 django.setup()
 
-from chat.routing import websocket_urlpatterns
+from chat.routing import websocket_urlpatterns as chat_websocket_urlpatterns
+from notifications.routing import websocket_urlpatterns as notification_websocket_urlpatterns
+from analytics.routing import websocket_urlpatterns as analytics_websocket_urlpatterns
+from video_collaboration.routing import websocket_urlpatterns as video_websocket_urlpatterns
+
+# Combine all WebSocket URL patterns
+all_websocket_urlpatterns = (
+    chat_websocket_urlpatterns + 
+    notification_websocket_urlpatterns + 
+    analytics_websocket_urlpatterns +
+    video_websocket_urlpatterns
+)
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
     "websocket": AllowedHostsOriginValidator(
         AuthMiddlewareStack(
             URLRouter(
-                websocket_urlpatterns
+                all_websocket_urlpatterns
             )
         )
     ),

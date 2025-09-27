@@ -1,8 +1,8 @@
 import React from 'react'
 import { MatchResult } from '../../services/matchingAPI'
-import Card from '../ui/Card'
+import { Card } from '../ui/Card'
 import Badge from '../ui/Badge'
-import Button from '../ui/Button'
+import { Button } from '../ui/Button'
 import { Star, MapPin, Clock, User, MessageCircle, X, Eye } from 'lucide-react'
 
 interface MatchCardProps {
@@ -212,7 +212,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({
         {match.status === 'pending' && onMarkViewed && (
           <Button
             onClick={() => onMarkViewed(match.id)}
-            variant="outline"
+            variant="secondary"
             size="sm"
             className="flex items-center gap-2"
           >
@@ -235,7 +235,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({
         {onViewProfile && (
           <Button
             onClick={() => onViewProfile(match.matched_creator)}
-            variant="outline"
+            variant="secondary"
             size="sm"
             className="flex items-center gap-2"
           >
@@ -247,7 +247,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({
         {(match.status === 'pending' || match.status === 'viewed') && onDecline && (
           <Button
             onClick={() => onDecline(match.id)}
-            variant="outline"
+            variant="secondary"
             size="sm"
             className="text-red-600 border-red-300 hover:bg-red-50 flex items-center gap-2 ml-auto"
           >
