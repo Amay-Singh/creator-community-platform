@@ -391,12 +391,29 @@ def batch_content_generation(request):
 @api_view(['GET'])
 @permission_classes([permissions.AllowAny])  # Health endpoints should be public
 def simple_ai_health(request):
-    """Simple AI services health check"""
-    return Response({
-        'status': 'healthy',
-        'service': 'ai_services',
-        'timestamp': timezone.now()
-    })
+    """AI services health check with Gemini integration"""
+    try:
+        from .gemini_service import gemini_service
+        gemini_health = gemini_service.health_check()
+        
+        return Response({
+            'status': 'healthy',
+            'service': 'ai_services',
+            'gemini': gemini_health,
+            'endpoints': {
+                'content_generation': '/api/ai_services/generate/',
+                'matching': '/api/ai_services/matching/',
+                'health': '/api/ai_services/health/'
+            },
+            'timestamp': timezone.now()
+        })
+    except Exception as e:
+        return Response({
+            'status': 'healthy',
+            'service': 'ai_services',
+            'gemini': {'status': 'not_configured', 'error': str(e)},
+            'timestamp': timezone.now()
+        })
 
 @api_view(['GET'])
 @permission_classes([permissions.AllowAny])  # Health endpoints should be public

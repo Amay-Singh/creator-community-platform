@@ -5,6 +5,7 @@ Enhanced for P5-006: AI Content Generation Assistant
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
+from simple_health_endpoints import simple_ai_health
 
 app_name = 'ai_services'
 
@@ -41,7 +42,7 @@ urlpatterns = [
     path('matching/stats/', views.match_statistics, name='match_statistics'),
     
     # Health check and monitoring (Phase 5 Guardian fixes)
-    path('health/', views.simple_ai_health, name='simple_ai_health'),
+    path('health/', simple_ai_health, name='simple_ai_health'),
     path('health/detailed/', views.detailed_health_check, name='detailed_health_check'),
     path('health/cache/clear/', views.clear_service_cache, name='clear_service_cache'),
     

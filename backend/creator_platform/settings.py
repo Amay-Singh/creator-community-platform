@@ -1,9 +1,14 @@
 """
-Django settings for Creator Community Platform
+Django settings for creator_platform project.
 """
-import os
 from pathlib import Path
+import os
 import dj_database_url
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.redis import RedisIntegration
@@ -113,12 +118,44 @@ if DATABASES["default"]["ENGINE"].endswith("postgresql") and os.environ.get("DAT
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
 SUPABASE_ANON_KEY = os.environ.get("SUPABASE_ANON_KEY", "")
 
-# --- Cache (simple local cache)
+# --- Cache (Redis Cloud Configuration with SSL)
+import ssl
+import certifi
+
+REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
+
+# Redis Cloud SSL configuration
+if REDIS_URL.startswith('rediss://'):
+    REDIS_CONNECTION_KWARGS = {
+        "ssl_cert_reqs": ssl.CERT_REQUIRED,
+        "ssl_ca_certs": certifi.where(),
+        "ssl_check_hostname": False,
+        "health_check_interval": 30,
+        "socket_connect_timeout": 5,
+        "socket_timeout": 5,
+        "retry_on_timeout": True,
+    }
+else:
+    REDIS_CONNECTION_KWARGS = {
+        "retry_on_timeout": True,
+    }
+
 CACHES = {
     "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": REDIS_URL,
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "CONNECTION_POOL_KWARGS": REDIS_CONNECTION_KWARGS,
+        },
+        "KEY_PREFIX": "creator_platform",
+        "TIMEOUT": 300,  # 5 minutes default
     }
 }
+
+# Use Redis for sessions as well
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
 
 # --- DRF
 REST_FRAMEWORK = {

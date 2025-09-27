@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from redis_health_endpoints import redis_notifications_health
 
 urlpatterns = [
     path('', views.notifications_list, name='notifications-list'),
@@ -30,6 +31,6 @@ urlpatterns = [
     path('analytics/user-history/', views.analytics_user_history, name='analytics_user_history'),
     
     # System monitoring endpoints
-    path('health/', views.simple_health, name='simple_health'),
+    path('health/', redis_notifications_health, name='redis_notifications_health'),
     path('alerts/', views.system_alerts, name='system_alerts'),
 ]

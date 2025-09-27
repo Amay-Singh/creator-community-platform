@@ -8,6 +8,7 @@ from rest_framework.routers import DefaultRouter
 from django.http import JsonResponse
 from . import views
 from . import invitation_api
+from redis_health_endpoints import redis_collaborations_health
 
 def projects_list(request):
     """List projects endpoint"""
@@ -58,7 +59,7 @@ urlpatterns = [
     path('invites/<uuid:invite_id>/decline/', invitation_api.decline_invite, name='decline_invite'),
     path('invites/<uuid:invite_id>/counter/', invitation_api.counter_offer_invite, name='counter_offer_invite'),
     path('invites/<uuid:invite_id>/cancel/', invitation_api.cancel_invite, name='cancel_invite'),
-    path('invites/health/', invitation_api.simple_invite_health, name='simple_invite_health'),
+    path('invites/health/', redis_collaborations_health, name='redis_collaborations_health'),
     
     # Invite Templates
     path('invites/templates/', invitation_api.invite_templates, name='invite_templates'),

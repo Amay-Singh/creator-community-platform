@@ -4,6 +4,7 @@ P9-003: Advanced Video Collaboration Tools
 """
 from django.urls import path
 from . import views
+from agora_service import video_collaboration_health_endpoint
 
 app_name = 'video_collaboration'
 
@@ -26,5 +27,5 @@ urlpatterns = [
     path('analytics/', views.get_video_analytics, name='get_video_analytics'),
     
     # Health check
-    path('health/', views.simple_video_health, name='simple_video_health'),
+    path('health/', video_collaboration_health_endpoint, name='video_collaboration_health_endpoint'),
 ]

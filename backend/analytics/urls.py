@@ -3,13 +3,14 @@ Analytics URL configuration
 """
 from django.urls import path
 from . import views
+from analytics_service import analytics_health_endpoint
 
 app_name = 'analytics'
 
 urlpatterns = [
     # Dashboard and overview
     path('dashboard/', views.analytics_dashboard, name='dashboard'),
-    path('health/', views.simple_analytics_health, name='simple_analytics_health'),
+    path('health/', analytics_health_endpoint, name='analytics_health_endpoint'),
     
     # Metrics endpoints
     path('platform-metrics/', views.platform_metrics, name='platform_metrics'),

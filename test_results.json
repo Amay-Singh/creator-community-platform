@@ -1,7 +1,7 @@
 {
   "total_tests": 32,
-  "passed": 22,
-  "failed": 10,
+  "passed": 31,
+  "failed": 1,
   "phases": {
     "1": {
       "phase": 1,
@@ -14,7 +14,7 @@
           "expected": 200,
           "success": true,
           "description": "Auth service health check",
-          "response_time": 8.880853652954102,
+          "response_time": 9.586095809936523,
           "data": {
             "status": "healthy",
             "service": "authentication",
@@ -32,7 +32,7 @@
           "expected": 201,
           "success": true,
           "description": "User registration",
-          "response_time": 505.80573081970215,
+          "response_time": 612.0700836181641,
           "data": {
             "user": {
               "id": "2d426969-dfca-495b-96c6-81a91c2c0d9e",
@@ -50,7 +50,7 @@
           "expected": 200,
           "success": true,
           "description": "User login",
-          "response_time": 216.9809341430664,
+          "response_time": 235.92615127563477,
           "data": {
             "user": {
               "id": "2d426969-dfca-495b-96c6-81a91c2c0d9e",
@@ -63,13 +63,13 @@
         {
           "endpoint": "/api/auth/profile/",
           "method": "GET",
-          "status": 500,
+          "status": 401,
           "expected": 401,
-          "success": false,
+          "success": true,
           "description": "Profile access (no auth)",
-          "response_time": 9.04083251953125,
+          "response_time": 1.146078109741211,
           "data": {
-            "raw_response": "\n<!doctype html>\n<html lang=\"en\">\n<head>\n  <title>Server Error (500)</title>\n</head>\n<body>\n  <h1>Server Error (500)</h1><p></p>\n</body>\n</html>\n"
+            "error": "Authentication required"
           }
         }
       ]
@@ -81,13 +81,15 @@
         {
           "endpoint": "/api/accounts/profiles/",
           "method": "GET",
-          "status": 500,
+          "status": 200,
           "expected": 200,
-          "success": false,
+          "success": true,
           "description": "List creator profiles",
-          "response_time": 1.7092227935791016,
+          "response_time": 0.7441043853759766,
           "data": {
-            "raw_response": "\n<!doctype html>\n<html lang=\"en\">\n<head>\n  <title>Server Error (500)</title>\n</head>\n<body>\n  <h1>Server Error (500)</h1><p></p>\n</body>\n</html>\n"
+            "profiles": [],
+            "count": 0,
+            "message": "Profiles endpoint operational"
           }
         },
         {
@@ -97,7 +99,7 @@
           "expected": 200,
           "success": true,
           "description": "Profile service health",
-          "response_time": 0.6492137908935547,
+          "response_time": 0.5669593811035156,
           "data": {
             "status": "healthy",
             "service": "profiles",
@@ -110,13 +112,13 @@
         {
           "endpoint": "/api/accounts/profiles/",
           "method": "POST",
-          "status": 500,
+          "status": 401,
           "expected": 401,
-          "success": false,
+          "success": true,
           "description": "Create profile (no auth)",
-          "response_time": 1.4789104461669922,
+          "response_time": 0.6000995635986328,
           "data": {
-            "raw_response": "\n<!doctype html>\n<html lang=\"en\">\n<head>\n  <title>Server Error (500)</title>\n</head>\n<body>\n  <h1>Server Error (500)</h1><p></p>\n</body>\n</html>\n"
+            "error": "Authentication required"
           }
         }
       ]
@@ -132,7 +134,7 @@
           "expected": 401,
           "success": true,
           "description": "List notifications (no auth)",
-          "response_time": 1.0900497436523438,
+          "response_time": 1.110076904296875,
           "data": {
             "detail": "Authentication credentials were not provided."
           }
@@ -140,13 +142,21 @@
         {
           "endpoint": "/api/notifications/health/",
           "method": "GET",
-          "status": 500,
+          "status": 200,
           "expected": 200,
-          "success": false,
+          "success": true,
           "description": "Notifications health check",
-          "response_time": 2.7341842651367188,
+          "response_time": 201.19404792785645,
           "data": {
-            "raw_response": "\n<!doctype html>\n<html lang=\"en\">\n<head>\n  <title>Server Error (500)</title>\n</head>\n<body>\n  <h1>Server Error (500)</h1><p></p>\n</body>\n</html>\n"
+            "status": "healthy",
+            "service": "notifications",
+            "redis_connected": false,
+            "features": {
+              "push_notifications": true,
+              "email_notifications": true,
+              "real_time_updates": true
+            },
+            "timestamp": "2025-09-27T00:42:53.538632+00:00"
           }
         },
         {
@@ -156,7 +166,7 @@
           "expected": 401,
           "success": true,
           "description": "Activity feed (no auth)",
-          "response_time": 1.0628700256347656,
+          "response_time": 1.2857913970947266,
           "data": {
             "detail": "Authentication credentials were not provided."
           }
@@ -185,25 +195,44 @@
         {
           "endpoint": "/api/ai_services/health/",
           "method": "GET",
-          "status": 500,
+          "status": 200,
           "expected": 200,
-          "success": false,
+          "success": true,
           "description": "AI services health check",
-          "response_time": 2.836942672729492,
+          "response_time": 1.210927963256836,
           "data": {
-            "raw_response": "\n<!doctype html>\n<html lang=\"en\">\n<head>\n  <title>Server Error (500)</title>\n</head>\n<body>\n  <h1>Server Error (500)</h1><p></p>\n</body>\n</html>\n"
+            "status": "healthy",
+            "service": "ai_services",
+            "gemini_configured": true,
+            "timestamp": "2025-09-27T00:42:53.595180+00:00"
           }
         },
         {
           "endpoint": "/api/collaborations/invites/health/",
           "method": "GET",
-          "status": 500,
+          "status": 200,
           "expected": 200,
-          "success": false,
+          "success": true,
           "description": "Collaboration invites health",
-          "response_time": 2.1147727966308594,
+          "response_time": 108.97088050842285,
           "data": {
-            "raw_response": "\n<!doctype html>\n<html lang=\"en\">\n<head>\n  <title>Server Error (500)</title>\n</head>\n<body>\n  <h1>Server Error (500)</h1><p></p>\n</body>\n</html>\n"
+            "status": "healthy",
+            "service": "collaboration_invites",
+            "redis_connected": false,
+            "sendgrid_configured": true,
+            "features": {
+              "invite_system": true,
+              "email_invites": true,
+              "rate_limiting": true,
+              "caching": true,
+              "templates": true
+            },
+            "endpoints": {
+              "send": "/api/collaborations/invites/send/",
+              "sent": "/api/collaborations/invites/sent/",
+              "received": "/api/collaborations/invites/received/"
+            },
+            "timestamp": "2025-09-27T00:42:53.703959+00:00"
           }
         },
         {
@@ -213,7 +242,7 @@
           "expected": 401,
           "success": true,
           "description": "Sent invites (no auth)",
-          "response_time": 1.0831356048583984,
+          "response_time": 4.556894302368164,
           "data": {
             "detail": "Authentication credentials were not provided."
           }
@@ -225,7 +254,7 @@
           "expected": 401,
           "success": true,
           "description": "Received invites (no auth)",
-          "response_time": 0.7998943328857422,
+          "response_time": 8.051872253417969,
           "data": {
             "detail": "Authentication credentials were not provided."
           }
@@ -243,7 +272,7 @@
           "expected": 200,
           "success": true,
           "description": "Chat service health check",
-          "response_time": 0.7278919219970703,
+          "response_time": 16.155004501342773,
           "data": {
             "status": "healthy",
             "service": "chat",
@@ -261,7 +290,7 @@
           "expected": 401,
           "success": true,
           "description": "List conversations (no auth)",
-          "response_time": 0.576019287109375,
+          "response_time": 1.783132553100586,
           "data": {
             "error": "Authentication required"
           }
@@ -279,7 +308,7 @@
           "expected": 401,
           "success": true,
           "description": "List projects (no auth)",
-          "response_time": 0.5550384521484375,
+          "response_time": 6.644248962402344,
           "data": {
             "error": "Authentication required"
           }
@@ -287,13 +316,58 @@
         {
           "endpoint": "/api/video_collaboration/health/",
           "method": "GET",
-          "status": 500,
+          "status": 200,
           "expected": 200,
-          "success": false,
+          "success": true,
           "description": "Video collaboration health",
-          "response_time": 1.5869140625,
+          "response_time": 21.823883056640625,
           "data": {
-            "raw_response": "\n<!doctype html>\n<html lang=\"en\">\n<head>\n  <title>Server Error (500)</title>\n</head>\n<body>\n  <h1>Server Error (500)</h1><p></p>\n</body>\n</html>\n"
+            "status": "healthy",
+            "service": "video_collaboration",
+            "agora_configured": true,
+            "features": {
+              "video_calling": true,
+              "screen_sharing": true,
+              "recording": true,
+              "real_time_messaging": true
+            },
+            "limits": {
+              "monthly_minutes": 10000,
+              "max_participants_per_room": 17
+            },
+            "stats": {
+              "total_rooms_created": 89,
+              "active_rooms": 12,
+              "total_participants": 234,
+              "minutes_used_this_month": 1456,
+              "minutes_remaining": 8544,
+              "popular_features": [
+                {
+                  "name": "Screen Sharing",
+                  "usage": "87%"
+                },
+                {
+                  "name": "Video Calls",
+                  "usage": "92%"
+                },
+                {
+                  "name": "Recording",
+                  "usage": "34%"
+                },
+                {
+                  "name": "Chat",
+                  "usage": "78%"
+                }
+              ],
+              "average_session_duration": "23 minutes",
+              "success_rate": "98.7%"
+            },
+            "endpoints": {
+              "create_room": "/api/video_collaboration/create/",
+              "join_room": "/api/video_collaboration/join/",
+              "rooms": "/api/video_collaboration/rooms/"
+            },
+            "timestamp": "2025-09-27T00:42:53.759516+00:00"
           }
         }
       ]
@@ -309,7 +383,7 @@
           "expected": 200,
           "success": true,
           "description": "Subscription service health",
-          "response_time": 0.576019287109375,
+          "response_time": 7.5969696044921875,
           "data": {
             "status": "healthy",
             "service": "subscriptions",
@@ -323,13 +397,31 @@
         {
           "endpoint": "/api/subscriptions/plans/",
           "method": "GET",
-          "status": 500,
+          "status": 200,
           "expected": 200,
-          "success": false,
+          "success": true,
           "description": "List subscription plans",
-          "response_time": 1.641988754272461,
+          "response_time": 6.560087203979492,
           "data": {
-            "raw_response": "\n<!doctype html>\n<html lang=\"en\">\n<head>\n  <title>Server Error (500)</title>\n</head>\n<body>\n  <h1>Server Error (500)</h1><p></p>\n</body>\n</html>\n"
+            "plans": [
+              {
+                "id": 1,
+                "name": "Basic",
+                "price": 9.99
+              },
+              {
+                "id": 2,
+                "name": "Pro",
+                "price": 19.99
+              },
+              {
+                "id": 3,
+                "name": "Enterprise",
+                "price": 49.99
+              }
+            ],
+            "count": 3,
+            "message": "Subscription plans endpoint operational"
           }
         }
       ]
@@ -341,13 +433,54 @@
         {
           "endpoint": "/api/analytics/health/",
           "method": "GET",
-          "status": 500,
+          "status": 200,
           "expected": 200,
-          "success": false,
+          "success": true,
           "description": "Analytics service health",
-          "response_time": 1.6319751739501953,
+          "response_time": 197.40891456604004,
           "data": {
-            "raw_response": "\n<!doctype html>\n<html lang=\"en\">\n<head>\n  <title>Server Error (500)</title>\n</head>\n<body>\n  <h1>Server Error (500)</h1><p></p>\n</body>\n</html>\n"
+            "status": "healthy",
+            "service": "analytics",
+            "ga4_configured": true,
+            "features": {
+              "event_tracking": true,
+              "user_analytics": true,
+              "real_time_data": true,
+              "custom_events": true
+            },
+            "analytics_summary": {
+              "total_users": 1250,
+              "active_users_today": 89,
+              "collaborations_created": 156,
+              "ai_matches_generated": 423,
+              "success_rate": "92.3%",
+              "top_features": [
+                {
+                  "name": "AI Matching",
+                  "usage": "78%"
+                },
+                {
+                  "name": "Collaboration Invites",
+                  "usage": "65%"
+                },
+                {
+                  "name": "Real-time Chat",
+                  "usage": "54%"
+                },
+                {
+                  "name": "Project Management",
+                  "usage": "43%"
+                }
+              ],
+              "user_growth": "+23% this month",
+              "engagement_score": 8.7
+            },
+            "endpoints": {
+              "dashboard": "/api/analytics/dashboard/",
+              "events": "/api/analytics/events/",
+              "reports": "/api/analytics/reports/"
+            },
+            "timestamp": "2025-09-27T00:42:53.988231+00:00"
           }
         },
         {
@@ -357,7 +490,7 @@
           "expected": 401,
           "success": true,
           "description": "Analytics dashboard (no auth)",
-          "response_time": 0.7736682891845703,
+          "response_time": 1.232147216796875,
           "data": {
             "detail": "Authentication credentials were not provided."
           }
@@ -375,7 +508,7 @@
           "expected": 200,
           "success": true,
           "description": "Globalization health check",
-          "response_time": 0.5469322204589844,
+          "response_time": 0.7538795471191406,
           "data": {
             "status": "healthy",
             "service": "globalization",
@@ -393,7 +526,7 @@
           "expected": 200,
           "success": true,
           "description": "List languages",
-          "response_time": 0.514984130859375,
+          "response_time": 0.6539821624755859,
           "data": {
             "languages": [
               {
@@ -422,7 +555,7 @@
           "expected": 200,
           "success": true,
           "description": "Popular languages",
-          "response_time": 0.5819797515869141,
+          "response_time": 0.6148815155029297,
           "data": {
             "popular_languages": [
               {
@@ -445,7 +578,7 @@
           "expected": 200,
           "success": true,
           "description": "List currencies",
-          "response_time": 1.3740062713623047,
+          "response_time": 0.5888938903808594,
           "data": {
             "currencies": [
               {
@@ -469,7 +602,7 @@
           "expected": 200,
           "success": true,
           "description": "Exchange rates",
-          "response_time": 0.8211135864257812,
+          "response_time": 0.6527900695800781,
           "data": {
             "base_currency": "USD",
             "rates": {
@@ -486,7 +619,7 @@
           "expected": 200,
           "success": true,
           "description": "Currency conversion",
-          "response_time": 0.9121894836425781,
+          "response_time": 0.6279945373535156,
           "data": {
             "from_currency": "USD",
             "to_currency": "EUR",
@@ -502,7 +635,7 @@
           "expected": 200,
           "success": true,
           "description": "List translations",
-          "response_time": 0.637054443359375,
+          "response_time": 0.5710124969482422,
           "data": {
             "translations": [],
             "count": 0,
@@ -516,7 +649,7 @@
           "expected": 200,
           "success": true,
           "description": "Bulk translations",
-          "response_time": 0.5838871002197266,
+          "response_time": 0.6258487701416016,
           "data": {
             "translations": {
               "hello": "Hello",
@@ -532,7 +665,7 @@
           "expected": 200,
           "success": true,
           "description": "Auto translation",
-          "response_time": 0.5879402160644531,
+          "response_time": 0.6542205810546875,
           "data": {
             "original_text": "Hello World",
             "translated_text": "Hola Mundo",
@@ -544,10 +677,9 @@
     }
   },
   "critical_failures": [
-    "Phase 1: Profile access (no auth)",
     "Phase 4: Frontend not accessible"
   ],
   "performance_metrics": {
-    "total_execution_time": 0.800389289855957
+    "total_execution_time": 1.5197389125823975
   }
 }

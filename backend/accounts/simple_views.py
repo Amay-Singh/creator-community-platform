@@ -78,7 +78,10 @@ class ProfileView(generics.RetrieveUpdateAPIView):
             # This is the profile detail endpoint
             if not request.user.is_authenticated:
                 return Response({'error': 'Authentication required'}, status=401)
-            return super().get(request, *args, **kwargs)
+            try:
+                return super().get(request, *args, **kwargs)
+            except Exception as e:
+                return Response({'error': str(e)}, status=500)
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])

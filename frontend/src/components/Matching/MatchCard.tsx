@@ -1,6 +1,6 @@
 import React from 'react'
 import { MatchResult } from '../../services/matchingAPI'
-import Card from '../ui/Card'
+import { Card } from '../ui/Card'
 import Badge from '../ui/Badge'
 import Button from '../ui/Button'
 import { Star, MapPin, Clock, User, MessageCircle, X, Eye } from 'lucide-react'
