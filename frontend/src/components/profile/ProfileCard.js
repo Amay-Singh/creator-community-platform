@@ -1,8 +1,8 @@
 import React from 'react';
 import clsx from 'clsx';
 import Avatar from '../ui/Avatar';
-import Button from '../ui/Button';
-import Card from '../ui/Card';
+import { Button } from '../ui/Button';
+import { Card } from '../ui/Card';
 
 const ProfileCard = ({ 
   profile, 

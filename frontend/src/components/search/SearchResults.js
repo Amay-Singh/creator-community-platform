@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import clsx from 'clsx';
 import ProfileCard from '../profile/ProfileCard';
-import Button from '../ui/Button';
+import { Button } from '../ui/Button';
 
 const SearchResults = ({ 
   results = [], 

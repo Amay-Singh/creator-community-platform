@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { matchingAPI, MatchResult } from '../../services/matchingAPI'
-import Card from '../ui/Card'
-import Button from '../ui/Button'
+import { Card } from '../ui/Card'
+import { Button } from '../ui/Button'
 import Textarea from '../ui/Textarea'
 import Select from '../ui/Select'
 import { Star, MessageSquare, CheckCircle, X } from 'lucide-react'
@@ -208,7 +208,7 @@ export const MatchFeedback: React.FC<MatchFeedbackProps> = ({
             <Button
               type="button"
               onClick={onClose}
-              variant="outline"
+              variant="secondary"
             >
               Cancel
             </Button>

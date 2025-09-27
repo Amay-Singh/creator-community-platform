@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import clsx from 'clsx';
-import Button from '../ui/Button';
-import Input from '../ui/Input';
-import Card from '../ui/Card';
+import { Button } from '../ui/Button';
+import { Input } from '../ui/Input';
+import { Card } from '../ui/Card';
 
 const SearchFilters = ({ filters, onFiltersChange, className }) => {
   const [localFilters, setLocalFilters] = useState({

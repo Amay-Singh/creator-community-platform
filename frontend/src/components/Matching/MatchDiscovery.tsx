@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { matchingAPI, MatchRequest, MatchResult } from '../../services/matchingAPI'
-import Button from '../ui/Button'
-import Card from '../ui/Card'
-import Input from '../ui/Input'
+import { Button } from '../ui/Button'
+import { Card } from '../ui/Card'
+import { Input } from '../ui/Input'
 import Select from '../ui/Select'
 import Badge from '../ui/Badge'
 import { Loader2, Search, Filter, Star, MapPin, Clock, Users } from 'lucide-react'
@@ -104,7 +104,7 @@ export const MatchDiscovery: React.FC<MatchDiscoveryProps> = ({ onMatchSelect })
         </div>
         <Button
           onClick={() => setShowFilters(!showFilters)}
-          variant="outline"
+          variant="secondary"
           className="flex items-center gap-2"
         >
           <Filter className="h-4 w-4" />
@@ -216,7 +216,7 @@ export const MatchDiscovery: React.FC<MatchDiscoveryProps> = ({ onMatchSelect })
             <p className="text-gray-600 mb-4">
               Try adjusting your filters or update your profile to get better matches.
             </p>
-            <Button onClick={handleFindMatches} variant="outline">
+            <Button onClick={handleFindMatches} variant="secondary">
               Search Again
             </Button>
           </Card>
@@ -311,7 +311,7 @@ export const MatchDiscovery: React.FC<MatchDiscoveryProps> = ({ onMatchSelect })
                   {match.status === 'pending' && (
                     <Button
                       onClick={() => handleMarkViewed(match.id)}
-                      variant="outline"
+                      variant="secondary"
                       size="sm"
                     >
                       Mark as Viewed
@@ -330,7 +330,7 @@ export const MatchDiscovery: React.FC<MatchDiscoveryProps> = ({ onMatchSelect })
                       
                       <Button
                         onClick={() => handleDecline(match.id)}
-                        variant="outline"
+                        variant="secondary"
                         size="sm"
                         className="text-red-600 border-red-300 hover:bg-red-50"
                       >
@@ -342,7 +342,7 @@ export const MatchDiscovery: React.FC<MatchDiscoveryProps> = ({ onMatchSelect })
                   {onMatchSelect && (
                     <Button
                       onClick={() => onMatchSelect(match)}
-                      variant="outline"
+                      variant="secondary"
                       size="sm"
                     >
                       View Details

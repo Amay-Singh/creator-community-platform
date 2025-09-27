@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { matchingAPI, MatchStatistics as MatchStatsType } from '../../services/matchingAPI'
-import Card from '../ui/Card'
+import { Card } from '../ui/Card'
 import Badge from '../ui/Badge'
 import { TrendingUp, Users, MessageCircle, Star, Calendar, Target } from 'lucide-react'
 

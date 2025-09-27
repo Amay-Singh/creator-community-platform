@@ -92,3 +92,4 @@ starter_ai_prompt_structure_v4_complete/
 
 # Windsurf IDE files
 .windsurf/
+frontend/node_modules/

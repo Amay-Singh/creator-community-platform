@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import clsx from 'clsx';
 import Avatar from '../ui/Avatar';
-import Button from '../ui/Button';
-import Input from '../ui/Input';
-import Card from '../ui/Card';
+import { Button } from '../ui/Button';
+import { Input } from '../ui/Input';
+import { Card } from '../ui/Card';
 
 const ChatInterface = ({ threadId, recipientUser }) => {
   const [messages, setMessages] = useState([]);

@@ -6,14 +6,13 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 const nextConfig = {
   // Performance optimizations
   experimental: {
-    optimizeCss: true,
-    optimizePackageImports: ['lucide-react', '@heroicons/react'],
+    // optimizeCss: true, // Disabled due to critters module issue
   },
+  optimizePackageImports: ['lucide-react', '@heroicons/react'],
   
   // Compression and optimization
   compress: true,
   poweredByHeader: false,
-  
   // Image optimization
   images: {
     formats: ['image/webp', 'image/avif'],
