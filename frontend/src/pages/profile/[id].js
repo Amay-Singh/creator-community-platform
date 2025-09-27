@@ -4,8 +4,8 @@ import Head from 'next/head';
 import clsx from 'clsx';
 import { useAuth } from '../../contexts/AuthContext';
 import Avatar from '../../components/ui/Avatar';
-import Button from '../../components/ui/Button';
-import Card from '../../components/ui/Card';
+import { Button } from '../../components/ui/Button';
+import { Card } from '../../components/ui/Card';
 
 export default function ProfileView() {
   const router = useRouter();

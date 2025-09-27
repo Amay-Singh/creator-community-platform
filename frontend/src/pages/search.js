@@ -3,8 +3,8 @@ import Head from 'next/head';
 import { useAuth } from '../contexts/AuthContext';
 import SearchFilters from '../components/search/SearchFilters';
 import SearchResults from '../components/search/SearchResults';
-import Input from '../components/ui/Input';
-import Button from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import { Button } from '../components/ui/Button';
 
 export default function Search() {
   const { user } = useAuth();
