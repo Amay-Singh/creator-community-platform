@@ -5,14 +5,20 @@ from pathlib import Path
 import os
 import dj_database_url
 from dotenv import load_dotenv
+import sys
 
-# Load environment variables from .env file
-load_dotenv()
+# Load appropriate .env file based on environment
+if 'runserver' in sys.argv or 'shell' in sys.argv:
+    # Development
+    load_dotenv()
+else:
+    # Production/CI - try production env first, fallback to default
+    load_dotenv('.env.production')
+    load_dotenv()  # Fallback to .env if .env.production doesn't exist
 
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.redis import RedisIntegration
-
 # --- Paths
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -124,18 +130,24 @@ import certifi
 
 REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
 
-# Redis Cloud SSL configuration
-if REDIS_URL.startswith('rediss://'):
-    REDIS_CONNECTION_KWARGS = {
-        "ssl_cert_reqs": ssl.CERT_REQUIRED,
-        "ssl_ca_certs": certifi.where(),
-        "ssl_check_hostname": False,
-        "health_check_interval": 30,
-        "socket_connect_timeout": 5,
-        "socket_timeout": 5,
-        "retry_on_timeout": True,
-    }
-else:
+# Redis Cloud SSL configuration (handle missing Redis gracefully)
+try:
+    if REDIS_URL and REDIS_URL.startswith('rediss://'):
+        REDIS_CONNECTION_KWARGS = {
+            "ssl_cert_reqs": ssl.CERT_REQUIRED,
+            "ssl_ca_certs": certifi.where(),
+            "ssl_check_hostname": False,
+            "health_check_interval": 30,
+            "socket_connect_timeout": 5,
+            "socket_timeout": 5,
+            "retry_on_timeout": True,
+        }
+    else:
+        REDIS_CONNECTION_KWARGS = {
+            "retry_on_timeout": True,
+        }
+except Exception:
+    # Fallback if Redis configuration fails
     REDIS_CONNECTION_KWARGS = {
         "retry_on_timeout": True,
     }
