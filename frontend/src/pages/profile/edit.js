@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useAuth } from '../../contexts/AuthContext';
-import Button from '../../components/ui/Button';
-import Input from '../../components/ui/Input';
+import { Button } from '../../components/ui/Button';
+import { Input } from '../../components/ui/Input';
 import FormGroup from '../../components/ui/FormGroup';
-import Card from '../../components/ui/Card';
+import { Card } from '../../components/ui/Card';
 import Avatar from '../../components/ui/Avatar';
 
 export default function ProfileEdit() {
@@ -31,20 +31,14 @@ export default function ProfileEdit() {
         username: user.username || '',
         bio: user.bio || '',
         location: user.location || '',
-        skills: user.skills?.join(', ') || '',
-        categories: user.categories?.join(', ') || '',
-        languages: user.languages?.join(', ') || '',
+        skills: user.skills?.join?.(', ') || '',
+        categories: user.categories?.join?.(', ') || '',
+        languages: user.languages?.join?.(', ') || '',
         portfolioUrl: user.portfolioUrl || ''
       });
     }
   }, [user]);
 
-  const handleInputChange = (field) => (e) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: e.target.value
-    }));
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -82,14 +76,14 @@ export default function ProfileEdit() {
       <div className="min-h-screen bg-[var(--color-neutral-50)]">
         {/* Header */}
         <header className="bg-white border-b border-[var(--color-neutral-200)]">
-          <div className="max-w-4xl mx-auto px-[var(--spacing-4)] py-[var(--spacing-4)]">
+          <div className="max-w-4xl mx-auto px-6 py-4">
             <div className="flex items-center justify-between">
-              <h1 className="text-[var(--font-size-2xl)] font-bold text-[var(--color-neutral-900)]">
+              <h1 className="text-2xl font-bold text-gray-900">
                 Edit Profile
               </h1>
               <Button
-                variant="ghost"
-                onClick={() => router.back()}
+                variant="secondary"
+                onClick={() => router.push('/dashboard')}
               >
                 Cancel
               </Button>
@@ -97,169 +91,102 @@ export default function ProfileEdit() {
           </div>
         </header>
 
-        <div className="max-w-4xl mx-auto px-[var(--spacing-4)] py-[var(--spacing-8)]">
+        {/* Main Content */}
+        <div className="max-w-4xl mx-auto px-6 py-8">
           <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-[var(--spacing-8)]">
-              {/* Profile Picture Section */}
-              <div className="lg:col-span-1">
-                <Card padding="lg">
-                  <h2 className="text-[var(--font-size-lg)] font-semibold text-[var(--color-neutral-900)] mb-[var(--spacing-6)]">
-                    Profile Picture
-                  </h2>
-                  
-                  <div className="text-center">
-                    <div className="relative inline-block mb-[var(--spacing-4)]">
-                      <Avatar 
-                        src={user?.avatar} 
-                        alt={formData.name || 'Profile'}
-                        size="2xl"
-                      />
-                      <button
-                        type="button"
-                        className="absolute -bottom-2 -right-2 w-8 h-8 bg-[var(--color-primary-600)] text-white rounded-[var(--radius-full)] flex items-center justify-center hover:bg-[var(--color-primary-700)] transition-colors duration-[var(--duration-fast)]"
-                        aria-label="Change profile picture"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                      </button>
-                    </div>
-                    
-                    <p className="text-[var(--font-size-sm)] text-[var(--color-neutral-600)] mb-[var(--spacing-4)]">
-                      Upload a new profile picture to help others recognize you
-                    </p>
-                    
-                    <Button variant="secondary" size="sm">
-                      Upload Photo
+            <Card className="p-6">
+              <div className="space-y-6">
+                {/* Profile Picture */}
+                <div className="flex items-center space-x-6">
+                  <Avatar
+                    src={user?.avatar}
+                    alt={user?.name}
+                    size="lg"
+                  />
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-900">Profile Picture</h3>
+                    <p className="text-sm text-gray-600">Update your profile photo</p>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      className="mt-2"
+                    >
+                      Change Photo
                     </Button>
                   </div>
-                </Card>
-              </div>
+                </div>
 
-              {/* Profile Information */}
-              <div className="lg:col-span-2">
-                <Card padding="lg">
-                  <h2 className="text-[var(--font-size-lg)] font-semibold text-[var(--color-neutral-900)] mb-[var(--spacing-6)]">
-                    Profile Information
-                  </h2>
-                  
-                  <div className="space-y-[var(--spacing-6)]">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-[var(--spacing-4)]">
-                      <FormGroup>
-                        <Input
-                          label="Full Name"
-                          value={formData.name}
-                          onChange={handleInputChange('name')}
-                          placeholder="Enter your full name"
-                          required
-                        />
-                      </FormGroup>
-                      
-                      <FormGroup>
-                        <Input
-                          label="Username"
-                          value={formData.username}
-                          onChange={handleInputChange('username')}
-                          placeholder="Choose a unique username"
-                          required
-                        />
-                      </FormGroup>
-                    </div>
+                {/* Form Fields */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormGroup>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Full Name
+                    </label>
+                    <Input
+                      type="text"
+                      value={formData.name}
+                      onChange={(e) => setFormData({...formData, name: e.target.value})}
+                      placeholder="Enter your full name"
+                    />
+                  </FormGroup>
 
-                    <FormGroup>
-                      <label className="block text-[var(--font-size-sm)] font-medium text-[var(--color-neutral-700)] mb-[var(--spacing-2)]">
-                        Bio
-                      </label>
-                      <textarea
-                        value={formData.bio}
-                        onChange={handleInputChange('bio')}
-                        placeholder="Tell others about yourself and your creative work..."
-                        rows={4}
-                        className="w-full px-[var(--spacing-4)] py-[var(--spacing-3)] border border-[var(--color-neutral-300)] rounded-[var(--radius-lg)] text-[var(--font-size-base)] text-[var(--color-neutral-900)] placeholder-[var(--color-neutral-500)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)] focus:border-transparent resize-vertical min-h-[100px]"
-                      />
-                    </FormGroup>
+                  <FormGroup>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Username
+                    </label>
+                    <Input
+                      type="text"
+                      value={formData.username}
+                      onChange={(e) => setFormData({...formData, username: e.target.value})}
+                      placeholder="Enter your username"
+                    />
+                  </FormGroup>
 
-                    <FormGroup>
-                      <Input
-                        label="Location"
-                        value={formData.location}
-                        onChange={handleInputChange('location')}
-                        placeholder="City, State/Country"
-                        helperText="Help others find local collaborators"
-                      />
-                    </FormGroup>
+                  <FormGroup className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Bio
+                    </label>
+                    <textarea
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      rows="4"
+                      value={formData.bio}
+                      onChange={(e) => setFormData({...formData, bio: e.target.value})}
+                      placeholder="Tell us about yourself"
+                    />
+                  </FormGroup>
 
-                    <FormGroup>
-                      <Input
-                        label="Skills"
-                        value={formData.skills}
-                        onChange={handleInputChange('skills')}
-                        placeholder="Digital Art, Music Production, Writing..."
-                        helperText="Separate multiple skills with commas"
-                      />
-                    </FormGroup>
+                  <FormGroup>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Location
+                    </label>
+                    <Input
+                      type="text"
+                      value={formData.location}
+                      onChange={(e) => setFormData({...formData, location: e.target.value})}
+                      placeholder="City, Country"
+                    />
+                  </FormGroup>
 
-                    <FormGroup>
-                      <Input
-                        label="Categories"
-                        value={formData.categories}
-                        onChange={handleInputChange('categories')}
-                        placeholder="Digital Art, Music, Writing, Photography..."
-                        helperText="Main creative categories you work in"
-                      />
-                    </FormGroup>
-
-                    <FormGroup>
-                      <Input
-                        label="Languages"
-                        value={formData.languages}
-                        onChange={handleInputChange('languages')}
-                        placeholder="English, Spanish, French..."
-                        helperText="Languages you can communicate in"
-                      />
-                    </FormGroup>
-
-                    <FormGroup>
-                      <Input
-                        label="Portfolio URL"
-                        value={formData.portfolioUrl}
-                        onChange={handleInputChange('portfolioUrl')}
-                        placeholder="https://yourportfolio.com"
-                        helperText="Link to your external portfolio or website"
-                      />
-                    </FormGroup>
-                  </div>
-                </Card>
-
-                {/* Portfolio Items Section */}
-                <Card padding="lg" className="mt-[var(--spacing-8)]">
-                  <div className="flex items-center justify-between mb-[var(--spacing-6)]">
-                    <h2 className="text-[var(--font-size-lg)] font-semibold text-[var(--color-neutral-900)]">
-                      Portfolio Items
-                    </h2>
-                    <Button variant="secondary" size="sm">
-                      Add Item
-                    </Button>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[var(--spacing-4)]">
-                    {/* Placeholder for portfolio items */}
-                    <div className="aspect-square border-2 border-dashed border-[var(--color-neutral-300)] rounded-[var(--radius-lg)] flex flex-col items-center justify-center text-[var(--color-neutral-500)] hover:border-[var(--color-primary-400)] hover:text-[var(--color-primary-600)] transition-colors duration-[var(--duration-fast)] cursor-pointer">
-                      <svg className="w-12 h-12 mb-[var(--spacing-2)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                      </svg>
-                      <span className="text-[var(--font-size-sm)] font-medium">Add Portfolio Item</span>
-                    </div>
-                  </div>
-                </Card>
+                  <FormGroup>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Skills
+                    </label>
+                    <Input
+                      type="text"
+                      value={formData.skills}
+                      onChange={(e) => setFormData({...formData, skills: e.target.value})}
+                      placeholder="e.g., Photography, Video Editing"
+                    />
+                  </FormGroup>
+                </div>
 
                 {/* Save Actions */}
-                <div className="flex items-center justify-end space-x-[var(--spacing-4)] mt-[var(--spacing-8)]">
+                <div className="flex items-center justify-end space-x-4 pt-6 border-t">
                   <Button
                     type="button"
-                    variant="ghost"
-                    onClick={() => router.back()}
+                    variant="secondary"
+                    onClick={() => router.push('/dashboard')}
                   >
                     Cancel
                   </Button>
@@ -272,7 +199,7 @@ export default function ProfileEdit() {
                   </Button>
                 </div>
               </div>
-            </div>
+            </Card>
           </form>
         </div>
       </div>
