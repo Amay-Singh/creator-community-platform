@@ -27,7 +27,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-dev-key-change-in-pro
 DEBUG = os.environ.get("DEBUG", "False").lower() in ("1", "true", "yes")
 
 # Hosts / CSRF
-ALLOWED_HOSTS = [h.strip() for h in os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1,0.0.0.0").split(",") if h.strip()]
+ALLOWED_HOSTS = [h.strip() for h in os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1,0.0.0.0,creator-platform-backend-vfuz.onrender.com").split(",") if h.strip()]
 CSRF_TRUSTED_ORIGINS = [o.strip() for o in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",") if o.strip()]
 
 # --- Apps
@@ -152,22 +152,33 @@ except Exception:
         "retry_on_timeout": True,
     }
 
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": REDIS_URL,
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "CONNECTION_POOL_KWARGS": REDIS_CONNECTION_KWARGS,
-        },
-        "KEY_PREFIX": "creator_platform",
-        "TIMEOUT": 300,  # 5 minutes default
+# Fallback cache configuration for Render deployment
+if os.environ.get("REDIS_URL"):
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": REDIS_URL,
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                "CONNECTION_POOL_KWARGS": REDIS_CONNECTION_KWARGS,
+            },
+            "KEY_PREFIX": "creator_platform",
+            "TIMEOUT": 300,  # 5 minutes default
+        }
     }
-}
-
-# Use Redis for sessions as well
-SESSION_ENGINE = "django.contrib.sessions.backends.cache"
-SESSION_CACHE_ALIAS = "default"
+    # Use Redis for sessions as well
+    SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+    SESSION_CACHE_ALIAS = "default"
+else:
+    # Fallback to database cache for deployment without Redis
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+            "LOCATION": "cache_table",
+        }
+    }
+    # Use database sessions as fallback
+    SESSION_ENGINE = "django.contrib.sessions.backends.db"
 
 # --- DRF
 REST_FRAMEWORK = {
