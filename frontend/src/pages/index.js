@@ -11,7 +11,8 @@ export default function Home() {
       if (user) {
         router.replace('/dashboard');
       } else {
-        router.replace('/login');
+        // For demo purposes, go directly to dashboard
+        router.replace('/dashboard');
       }
     }
   }, [user, loading, router]);
