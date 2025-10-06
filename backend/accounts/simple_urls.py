@@ -255,6 +255,49 @@ def verify_admin_user(request):
             'message': 'Check server logs for details'
         }, status=500)
 
+@csrf_exempt
+@require_http_methods(["GET"])
+def test_admin_models(request):
+    """
+    Test admin models loading to identify 500 error cause
+    """
+    try:
+        from django.contrib import admin
+        from django.apps import apps
+        
+        results = {
+            'admin_site_loaded': True,
+            'registered_models': [],
+            'app_issues': []
+        }
+        
+        # Test each app's admin registration
+        for app_config in apps.get_app_configs():
+            app_name = app_config.name
+            try:
+                # Try to import the app's admin module
+                admin_module = f"{app_name}.admin"
+                __import__(admin_module)
+                results['registered_models'].append(f"{app_name}: OK")
+            except ImportError:
+                # No admin.py - that's fine
+                results['registered_models'].append(f"{app_name}: No admin.py")
+            except Exception as e:
+                # Admin.py has issues
+                results['app_issues'].append(f"{app_name}: {str(e)}")
+        
+        # Test admin site registry
+        registered_count = len(admin.site._registry)
+        results['total_registered_models'] = registered_count
+        
+        return JsonResponse(results)
+        
+    except Exception as e:
+        return JsonResponse({
+            'error': f'Admin models test failed: {str(e)}',
+            'message': 'This might be the cause of the 500 error'
+        }, status=500)
+
 urlpatterns = [
     path('health/', auth_health, name='auth_health'),
     path('profile/health/', profile_health, name='profile_health'),
@@ -265,5 +308,6 @@ urlpatterns = [
     path('dashboard/', dashboard_view, name='dashboard'),
     path('create-admin/', create_admin_user, name='create_admin'),  # Emergency admin creation
     path('verify-admin/', verify_admin_user, name='verify_admin'),  # Admin verification
+    path('test-admin-models/', test_admin_models, name='test_admin_models'),  # Admin models test
     path('subscription/', include('accounts.subscription_urls')),
 ]
