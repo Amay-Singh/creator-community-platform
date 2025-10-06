@@ -41,9 +41,10 @@ class UserLoginSerializer(serializers.Serializer):
     def validate(self, attrs):
         email = attrs.get('email')
         password = attrs.get('password')
+        request = self.context.get('request')
         
         if email and password:
-            user = authenticate(username=email, password=password)
+            user = authenticate(request=request, username=email, password=password)
             if not user:
                 raise serializers.ValidationError('Invalid credentials')
             if not user.is_verified:
