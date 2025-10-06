@@ -28,7 +28,7 @@ DEBUG = os.environ.get("DEBUG", "False").lower() in ("1", "true", "yes")
 
 # Hosts / CSRF
 ALLOWED_HOSTS = [h.strip() for h in os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1,0.0.0.0,creator-platform-backend-vfuz.onrender.com").split(",") if h.strip()]
-CSRF_TRUSTED_ORIGINS = [o.strip() for o in os.environ.get("CSRF_TRUSTED_ORIGINS", "https://creator-platform-backend-vfuz.onrender.com").split(",") if o.strip()]
+CSRF_TRUSTED_ORIGINS = [o.strip() for o in os.environ.get("CSRF_TRUSTED_ORIGINS", "https://creator-platform-backend-vfuz.onrender.com,http://localhost:8000,http://localhost:8001,http://localhost:8002,http://localhost:8003,http://127.0.0.1:8000").split(",") if o.strip()]
 
 # --- Apps
 INSTALLED_APPS = [
@@ -53,8 +53,8 @@ INSTALLED_APPS = [
     "video_collaboration",
     "enterprise",
     "globalization",  # Re-enabled for Phase 10
-    # "subscriptions",  # Temporarily disabled due to model conflicts
-    # "axes",  # Temporarily disabled - causing admin login 500 errors
+    # "subscriptions",  # Disabled - model conflicts with accounts.SubscriptionPlan
+    "axes",  # Re-enabled with proper authentication backend
     "debug_toolbar",
 ]
 
@@ -72,14 +72,14 @@ MIDDLEWARE = [
     # "security.middleware.RequestLoggingMiddleware",
     # WhiteNoise to serve collected static files in UAT/PROD
     "whitenoise.middleware.WhiteNoiseMiddleware",
-    # "debug_toolbar.middleware.DebugToolbarMiddleware",
+    "debug_toolbar.middleware.DebugToolbarMiddleware",  # Enable debug toolbar
     # "utils.middleware.PerformanceMonitoringMiddleware",
     # "utils.middleware.CacheHitRateMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    # "axes.middleware.AxesMiddleware",  # Temporarily disabled - causing admin login 500 errors
+    "axes.middleware.AxesMiddleware",  # Re-enabled with proper authentication backend
     # "utils.middleware.ActiveUsersMiddleware",  # Temporarily disabled
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -279,6 +279,12 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # --- Custom User Model
 AUTH_USER_MODEL = "accounts.CustomUser"
+
+# --- Authentication Backends (Required for Django Axes)
+AUTHENTICATION_BACKENDS = [
+    'axes.backends.AxesStandaloneBackend',  # Required for Django Axes
+    'django.contrib.auth.backends.ModelBackend',  # Default Django backend
+]
 
 # --- Django Channels Configuration
 ASGI_APPLICATION = "creator_platform.asgi.application"
@@ -490,3 +496,29 @@ logging.basicConfig(
     format='%(levelname)s %(asctime)s %(name)s %(message)s',
     stream=sys.stdout
 )
+
+# --- Django Axes Configuration (Security)
+# Proper configuration to prevent production issues
+AXES_FAILURE_LIMIT = 5  # Allow 5 failed attempts before blocking
+AXES_COOLOFF_TIME = 1  # Block for 1 hour after limit reached
+AXES_LOCKOUT_CALLABLE = None  # Use default lockout behavior
+AXES_ENABLE_ADMIN = True  # Enable admin interface for Axes
+AXES_VERBOSE = True  # Enable verbose logging for debugging
+AXES_RESET_ON_SUCCESS = True  # Reset failed attempts on successful login
+AXES_LOCKOUT_PARAMETERS = ['ip_address', 'username']  # Lock by IP and username
+AXES_IPWARE_PROXY_COUNT = 1  # Handle proxy headers (important for Render)
+AXES_IPWARE_META_PRECEDENCE_ORDER = [
+    'HTTP_X_FORWARDED_FOR',  # Render proxy header
+    'HTTP_X_REAL_IP',
+    'REMOTE_ADDR',
+]
+# Disable cache for production reliability
+AXES_CACHE = 'default' if DEBUG else None
+AXES_HANDLER = 'axes.handlers.database.AxesDatabaseHandler'  # Use database handler
+
+# --- Debug Toolbar Configuration
+if DEBUG:
+    INTERNAL_IPS = [
+        '127.0.0.1',
+        'localhost',
+    ]

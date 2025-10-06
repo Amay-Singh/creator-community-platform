@@ -48,7 +48,7 @@ urlpatterns = [
     path('ads/<str:context>/', get_contextual_ads, name='contextual_ads'),
     
     # Subscription and Payment System (REQ-22-25)
-    path('subscription/', include('accounts.subscription_urls')),
+    path('subscriptions/', include('accounts.subscription_urls')),  # Changed to avoid namespace conflict
     
     # Public Profile Browsing
     path('profiles/', views.PublicProfileListView.as_view(), name='public_profiles'),

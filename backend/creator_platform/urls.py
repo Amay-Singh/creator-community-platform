@@ -44,7 +44,7 @@ urlpatterns = [
     path('api/video_collaboration/', include('video_collaboration.urls')),  # Fixed URL path
     path('api/enterprise/', include('enterprise.urls')),
     path('api/globalization/', include('globalization.urls')),  # Re-enabled
-    path('api/subscriptions/', include('accounts.subscription_urls')),  # Use accounts subscription URLs
+    # path('api/subscriptions/', include('subscriptions.urls')),  # Disabled - model conflicts
     path('api/activity/feed/', notification_views.activity_feed, name='activity-feed'),  # Fixed path
 ]
 
