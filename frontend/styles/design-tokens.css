@@ -1,11 +1,14 @@
-/* Creator Community Platform - Design Tokens v2.0 */
-/* Based on ReqDoc02 Frontend Redesign Specifications */
+/* Creator Community Platform - Design Tokens v3.0 */
+/* ReqDoc02 Frontend Redesign - Gen-Z Aesthetic */
+/* Inspired by Instagram/LinkedIn/Behance */
 
 :root {
-  /* Primary Colors - Gradient System */
+  /* Primary Colors - Vibrant Gradient System */
   --color-primary-start: #3B82F6;
   --color-primary-end: #8B5CF6;
   --color-primary-gradient: linear-gradient(135deg, var(--color-primary-start) 0%, var(--color-primary-end) 100%);
+  --color-primary-gradient-hover: linear-gradient(135deg, #2563EB 0%, #7C3AED 100%);
+  --color-primary-gradient-vertical: linear-gradient(180deg, var(--color-primary-start) 0%, var(--color-primary-end) 100%);
   
   /* Secondary Colors */
   --color-emerald: #10B981;
