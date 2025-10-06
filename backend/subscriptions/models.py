@@ -40,7 +40,7 @@ class SubscriptionPlan(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
-        db_table = 'subscriptions_subscription_plans'  # Changed to avoid conflict with accounts app
+        db_table = 'subscription_tiers'  # Clear, descriptive name avoiding conflicts
         ordering = ['price_monthly']
     
     def __str__(self):
@@ -86,7 +86,7 @@ class UserSubscription(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
-        db_table = 'subscriptions_user_subscriptions'  # Changed to avoid conflict with accounts app
+        db_table = 'active_subscriptions'  # Clear, descriptive name avoiding conflicts
         indexes = [
             models.Index(fields=['status', 'next_billing_date']),
         ]
