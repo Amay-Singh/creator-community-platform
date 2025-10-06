@@ -93,3 +93,13 @@ starter_ai_prompt_structure_v4_complete/
 # Windsurf IDE files
 .windsurf/
 frontend/node_modules/
+
+# Additional build files
+cookies.txt
+*.log
+.DS_Store
+frontend/.next/build-manifest.json
+frontend/.next/cache/
+frontend/.next/server/middleware-*
+frontend/.next/server/pages-manifest.json
+frontend/.next/trace
