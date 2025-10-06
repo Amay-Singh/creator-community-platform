@@ -280,10 +280,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # --- Custom User Model
 AUTH_USER_MODEL = "accounts.CustomUser"
 
-# --- Authentication Backends (Required for Django Axes)
+# --- Authentication Backends (Fixed for Django Axes)
 AUTHENTICATION_BACKENDS = [
-    'axes.backends.AxesStandaloneBackend',  # Required for Django Axes
     'django.contrib.auth.backends.ModelBackend',  # Default Django backend
+    'axes.backends.AxesBackend',  # Proper Axes backend that works with DRF
 ]
 
 # --- Django Channels Configuration
