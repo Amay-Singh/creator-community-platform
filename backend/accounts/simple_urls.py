@@ -208,6 +208,53 @@ def create_admin_user(request):
             'message': 'Please check server logs for details'
         }, status=500)
 
+@csrf_exempt
+@require_http_methods(["GET"])
+def verify_admin_user(request):
+    """
+    Verify admin user exists and can authenticate
+    """
+    User = get_user_model()
+    
+    try:
+        # Check if admin user exists
+        admin_users = User.objects.filter(is_superuser=True)
+        
+        if not admin_users.exists():
+            return JsonResponse({
+                'status': 'no_admin',
+                'message': 'No admin user found',
+                'solution': 'Use create-admin endpoint to create one'
+            })
+        
+        admin_user = admin_users.first()
+        
+        # Test authentication
+        from django.contrib.auth import authenticate
+        test_auth = authenticate(username=admin_user.email, password='CreatorPlatform2024!')
+        
+        return JsonResponse({
+            'status': 'admin_exists',
+            'admin_count': admin_users.count(),
+            'admin_email': admin_user.email,
+            'admin_username': admin_user.username,
+            'can_authenticate': test_auth is not None,
+            'is_active': admin_user.is_active,
+            'is_superuser': admin_user.is_superuser,
+            'login_instructions': {
+                'url': '/admin/',
+                'email': admin_user.email,
+                'password': 'CreatorPlatform2024!',
+                'note': 'Use email field for login'
+            }
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'error': f'Admin verification failed: {str(e)}',
+            'message': 'Check server logs for details'
+        }, status=500)
+
 urlpatterns = [
     path('health/', auth_health, name='auth_health'),
     path('profile/health/', profile_health, name='profile_health'),
@@ -217,5 +264,6 @@ urlpatterns = [
     path('profiles/', simple_profiles_create, name='profiles_list'),  # For /api/accounts/profiles/
     path('dashboard/', dashboard_view, name='dashboard'),
     path('create-admin/', create_admin_user, name='create_admin'),  # Emergency admin creation
+    path('verify-admin/', verify_admin_user, name='verify_admin'),  # Admin verification
     path('subscription/', include('accounts.subscription_urls')),
 ]
