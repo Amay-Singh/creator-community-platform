@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { SparklesIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { motion } from 'framer-motion';
+import Button from '../src/components/ui/Button';
+import Input from '../src/components/ui/Input';
+import Card from '../src/components/ui/Card';
 
 export default function Login() {
   const [formData, setFormData] = useState({
@@ -11,7 +14,6 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  
   const router = useRouter();
 
   const handleSubmit = async (e) => {
@@ -59,124 +61,156 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 relative overflow-hidden flex items-center justify-center py-12 px-4">
+      {/* Animated Background */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-600/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-purple-400/20 to-pink-600/20 rounded-full blur-3xl animate-pulse" />
+      </div>
+
+      <motion.div 
+        className="max-w-md w-full relative z-10"
+        initial={{ y: 50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.8 }}
+      >
         {/* Header */}
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center space-x-2 mb-6">
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-              <SparklesIcon className="w-6 h-6 text-white" />
-            </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+        <motion.div 
+          className="text-center mb-8"
+          initial={{ y: 30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          <Link href="/" className="inline-flex items-center space-x-3 mb-8 group">
+            <motion.div 
+              className="w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg"
+              whileHover={{ scale: 1.1, rotate: 5 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
+              <span className="text-white font-bold text-lg">C</span>
+            </motion.div>
+            <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent group-hover:from-purple-600 group-hover:to-pink-600 transition-all duration-300">
               Creator Community Platform
             </span>
           </Link>
           
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome back
-          </h2>
-          <p className="text-gray-600">
+          <motion.h2 
+            className="text-4xl font-bold mb-3"
+            initial={{ scale: 0.8 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
+            <span className="bg-gradient-to-r from-gray-900 via-blue-900 to-purple-900 bg-clip-text text-transparent">
+              Welcome back
+            </span>
+          </motion.h2>
+          <p className="text-gray-600 text-lg">
             Sign in to your creator account
           </p>
-        </div>
+        </motion.div>
 
         {/* Login Form */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <motion.div
+          initial={{ y: 30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.6 }}
+        >
+          <Card variant="glass" className="p-8">
+            <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center space-x-2">
+              <motion.div 
+                className="bg-red-50/80 backdrop-blur-sm border border-red-200/50 text-red-700 px-4 py-3 rounded-2xl flex items-center space-x-2"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                 </svg>
                 <span>{error}</span>
-              </div>
+              </motion.div>
             )}
             
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                  Email Address
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                  placeholder="Enter your email"
-                />
-              </div>
+            <div className="space-y-6">
+              <Input
+                label="Email Address"
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Enter your email"
+                required
+                icon={({ className }) => (
+                  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                  </svg>
+                )}
+              />
 
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                  Password
-                </label>
-                <div className="relative">
-                  <input
-                    id="password"
-                    name="password"
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    value={formData.password}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                    placeholder="Enter your password"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 transition-colors"
-                  >
-                    {showPassword ? (
-                      <EyeSlashIcon className="w-5 h-5" />
-                    ) : (
-                      <EyeIcon className="w-5 h-5" />
-                    )}
-                  </button>
-                </div>
-              </div>
+              <Input
+                label="Password"
+                type={showPassword ? "text" : "password"}
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Enter your password"
+                required
+                icon={({ className }) => (
+                  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                )}
+              />
             </div>
 
-            <button
+            <Button
               type="submit"
+              variant="primary"
+              size="lg"
               disabled={loading}
-              className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+              loading={loading}
+              className="w-full"
             >
-              {loading ? (
-                <div className="flex items-center justify-center space-x-2">
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>Signing in...</span>
-                </div>
-              ) : (
-                'Sign In'
-              )}
-            </button>
-          </form>
+              {loading ? 'Signing in...' : 'Sign In'}
+            </Button>
+            </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-gray-600">
-              Don't have an account?{' '}
-              <Link 
-                href="/register" 
-                className="font-semibold text-blue-600 hover:text-blue-700 transition-colors"
-              >
-                Create one here
-              </Link>
-            </p>
-          </div>
-        </div>
+            <div className="mt-8 text-center">
+              <p className="text-gray-600">
+                Don't have an account?{' '}
+                <Link href="/register" className="text-blue-600 hover:text-purple-600 font-semibold transition-colors">
+                  Sign up here
+                </Link>
+              </p>
+            </div>
+          </Card>
+        </motion.div>
 
         {/* Demo Credentials */}
-        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h3 className="font-semibold text-blue-900 mb-2">Demo Credentials:</h3>
-          <p className="text-blue-800 text-sm">
-            <strong>Email:</strong> admin@creator-platform.com<br />
-            <strong>Password:</strong> CreatorPlatform2024!
-          </p>
-        </div>
-      </div>
+        <motion.div 
+          className="mt-8"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.8 }}
+        >
+          <Card variant="glass" className="p-6">
+            <h4 className="text-sm font-semibold text-blue-900 mb-3 flex items-center">
+              <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+              Demo Credentials
+            </h4>
+            <div className="space-y-2 text-sm">
+              <p className="text-blue-800">
+                <span className="font-medium">Email:</span> admin@creator-platform.com
+              </p>
+              <p className="text-blue-800">
+                <span className="font-medium">Password:</span> CreatorPlatform2024!
+              </p>
+            </div>
+          </Card>
+        </motion.div>
+      </motion.div>
     </div>
   );
 }
