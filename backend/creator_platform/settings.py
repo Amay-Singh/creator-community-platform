@@ -54,7 +54,7 @@ INSTALLED_APPS = [
     "enterprise",
     "globalization",  # Re-enabled for Phase 10
     # "subscriptions",  # Temporarily disabled due to model conflicts
-    "axes",
+    # "axes",  # Temporarily disabled - causing admin login 500 errors
     "debug_toolbar",
 ]
 
@@ -79,7 +79,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "axes.middleware.AxesMiddleware",
+    # "axes.middleware.AxesMiddleware",  # Temporarily disabled - causing admin login 500 errors
     # "utils.middleware.ActiveUsersMiddleware",  # Temporarily disabled
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
