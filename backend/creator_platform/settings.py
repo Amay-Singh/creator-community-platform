@@ -299,14 +299,14 @@ CHANNEL_LAYERS = {
     },
 }
 
-# --- Cache Configuration (Redis)
+# --- Cache Configuration (Production-ready)
 CACHES = {
     "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": os.environ.get("REDIS_URL", "redis://localhost:6379/1"),
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        }
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "cache_table",
+    } if not DEBUG else {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "unique-snowflake",
     }
 }
 
@@ -346,10 +346,11 @@ DATABASES['default']['CONN_MAX_AGE'] = 60  # Keep connections alive for 60 secon
 # Cache timeout settings
 CACHE_TTL = 60 * 15  # 15 minutes default cache timeout
 
-# Session configuration for performance
-SESSION_ENGINE = "django.contrib.sessions.backends.cache"
-SESSION_CACHE_ALIAS = "default"
+# Session configuration for production reliability
+SESSION_ENGINE = "django.contrib.sessions.backends.db"  # Use database sessions for production
 SESSION_COOKIE_AGE = 86400  # 24 hours
+SESSION_COOKIE_SECURE = not DEBUG  # Secure cookies in production
+SESSION_COOKIE_HTTPONLY = True  # Prevent XSS attacks
 
 # --- Security Configuration
 # Django Axes (brute force protection)
@@ -512,8 +513,8 @@ AXES_IPWARE_META_PRECEDENCE_ORDER = [
     'HTTP_X_REAL_IP',
     'REMOTE_ADDR',
 ]
-# Disable cache for production reliability
-AXES_CACHE = 'default' if DEBUG else None
+# Use database handler for production reliability (no Redis dependency)
+AXES_CACHE = None  # Disable cache to avoid Redis dependency
 AXES_HANDLER = 'axes.handlers.database.AxesDatabaseHandler'  # Use database handler
 
 # --- Debug Toolbar Configuration
