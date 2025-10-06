@@ -28,7 +28,7 @@ DEBUG = os.environ.get("DEBUG", "False").lower() in ("1", "true", "yes")
 
 # Hosts / CSRF
 ALLOWED_HOSTS = [h.strip() for h in os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1,0.0.0.0,creator-platform-backend-vfuz.onrender.com").split(",") if h.strip()]
-CSRF_TRUSTED_ORIGINS = [o.strip() for o in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",") if o.strip()]
+CSRF_TRUSTED_ORIGINS = [o.strip() for o in os.environ.get("CSRF_TRUSTED_ORIGINS", "https://creator-platform-backend-vfuz.onrender.com").split(",") if o.strip()]
 
 # --- Apps
 INSTALLED_APPS = [
