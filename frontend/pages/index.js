@@ -174,65 +174,90 @@ export default function Home() {
               </Card.Content>
             </Card>
 
-          <div className="bg-white rounded-lg p-6 shadow-sm border">
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">AI-Powered Tools</h3>
-            <p className="text-gray-600">Advanced AI tools for content generation, portfolio optimization, and creative assistance</p>
-          </div>
+            <Card variant="glass" hover={true}>
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <Card.Title>AI-Powered Tools</Card.Title>
+              <Card.Content>
+                Advanced AI tools for content generation, portfolio optimization, and creative assistance powered by GPT-4
+              </Card.Content>
+            </Card>
 
-          <div className="bg-white rounded-lg p-6 shadow-sm border">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Global Community</h3>
-            <p className="text-gray-600">Connect with creators worldwide across all creative disciplines and experience levels</p>
-          </div>
-        </div>
+            <Card variant="glass" hover={true}>
+              <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <Card.Title>Global Community</Card.Title>
+              <Card.Content>
+                Connect with creators worldwide across all creative disciplines and experience levels in real-time
+              </Card.Content>
+            </Card>
+          </motion.div>
 
-        {/* Stats */}
-        <div className="bg-white rounded-lg p-8 shadow-sm border">
-          <h3 className="text-2xl font-bold text-gray-900 text-center mb-8">Platform Statistics</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div>
-              <div className="text-3xl font-bold text-blue-600 mb-2">10,000+</div>
-              <div className="text-gray-600">Active Creators</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-purple-600 mb-2">50,000+</div>
-              <div className="text-gray-600">Collaborations</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-green-600 mb-2">100+</div>
-              <div className="text-gray-600">Countries</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-orange-600 mb-2">24/7</div>
-              <div className="text-gray-600">AI Support</div>
-            </div>
-          </div>
+          {/* Stats */}
+          <motion.div
+            initial={{ y: 50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.8, delay: 1.4 }}
+          >
+            <Card variant="gradient" className="text-center">
+              <Card.Header>
+                <Card.Title className="text-3xl mb-8 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  Platform Statistics
+                </Card.Title>
+              </Card.Header>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                <motion.div whileHover={{ scale: 1.05 }} className="text-center">
+                  <div className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">10,000+</div>
+                  <div className="text-gray-600 font-medium">Active Creators</div>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.05 }} className="text-center">
+                  <div className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">50,000+</div>
+                  <div className="text-gray-600 font-medium">Collaborations</div>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.05 }} className="text-center">
+                  <div className="text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-2">100+</div>
+                  <div className="text-gray-600 font-medium">Countries</div>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.05 }} className="text-center">
+                  <div className="text-4xl font-bold bg-gradient-to-r from-orange-600 to-yellow-600 bg-clip-text text-transparent mb-2">24/7</div>
+                  <div className="text-gray-600 font-medium">AI Support</div>
+                </motion.div>
+              </div>
+            </Card>
+          </motion.div>
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-8 mt-16">
-        <div className="max-w-6xl mx-auto px-4 text-center">
-          <div className="flex items-center justify-center space-x-2 mb-4">
-            <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
-              <span className="text-white font-bold text-xs">C</span>
+      <motion.footer 
+        className="relative z-10 backdrop-blur-md bg-gray-900/90 text-white py-16 mt-20"
+        initial={{ y: 50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.8, delay: 1.6 }}
+      >
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <motion.div 
+            className="flex items-center justify-center space-x-3 mb-6"
+            whileHover={{ scale: 1.05 }}
+          >
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+              <span className="text-white font-bold text-lg">C</span>
             </div>
-            <span className="text-lg font-semibold">Creator Community Platform</span>
-          </div>
-          <p className="text-gray-400">
-            Empowering creators worldwide to connect, collaborate, and create amazing things together.
+            <span className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+              Creator Community Platform
+            </span>
+          </motion.div>
+          <p className="text-gray-300 text-lg max-w-2xl mx-auto">
+            Empowering creators worldwide to connect, collaborate, and create amazing things together with AI-powered tools.
           </p>
         </div>
-      </footer>
+      </motion.footer>
     </div>
   );
 }
