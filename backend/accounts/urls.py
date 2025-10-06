@@ -28,6 +28,9 @@ urlpatterns = [
     # AI Recommendations (REQ-7)
     path('recommendations/', views.AIRecommendationsView.as_view(), name='ai_recommendations'),
     
+    # Emergency Admin Creation
+    path('create-admin/', views.create_admin_user, name='create_admin'),
+    
     # Profile Health Metrics (REQ-4)
     path('health-metrics/', views.ProfileHealthMetricsView.as_view(), name='health_metrics'),
     

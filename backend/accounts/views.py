@@ -6,12 +6,13 @@ from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.authtoken.models import Token
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, get_user_model
 from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
 from django.conf import settings
 from django.utils import timezone
 from datetime import timedelta
+from django.http import JsonResponse
 import random
 import string
 
@@ -434,3 +435,44 @@ class PublicProfileDetailView(generics.RetrieveAPIView):
                 )
         
         return response
+
+
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def create_admin_user(request):
+    """
+    Emergency endpoint to create admin user
+    Only works if no admin exists
+    """
+    User = get_user_model()
+    
+    # Check if admin already exists
+    if User.objects.filter(is_superuser=True).exists():
+        return JsonResponse({
+            'error': 'Admin user already exists',
+            'admin_url': '/admin/',
+            'message': 'Use existing admin credentials'
+        }, status=400)
+    
+    try:
+        # Create admin user
+        admin_user = User.objects.create_superuser(
+            username='admin',
+            email='admin@creator-platform.com',
+            password='CreatorPlatform2024!'
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Admin user created successfully',
+            'username': 'admin',
+            'password': 'CreatorPlatform2024!',
+            'admin_url': '/admin/',
+            'login_url': '/admin/login/'
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'error': f'Failed to create admin user: {str(e)}',
+            'message': 'Please check server logs for details'
+        }, status=500)
