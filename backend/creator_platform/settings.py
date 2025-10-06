@@ -53,7 +53,7 @@ INSTALLED_APPS = [
     "video_collaboration",
     "enterprise",
     "globalization",  # Re-enabled for Phase 10
-    # "subscriptions",  # Disabled - model conflicts with accounts.SubscriptionPlan
+    "subscriptions",  # Re-enabled - table name conflicts resolved
     "axes",  # Re-enabled with proper authentication backend
     "debug_toolbar",
 ]
