@@ -298,6 +298,74 @@ def test_admin_models(request):
             'message': 'This might be the cause of the 500 error'
         }, status=500)
 
+@csrf_exempt
+@require_http_methods(["POST"])
+def test_admin_login(request):
+    """
+    Test admin login process with detailed error logging
+    """
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    try:
+        from django.contrib.auth import authenticate, login
+        from django.contrib.auth.forms import AuthenticationForm
+        from django.contrib import admin
+        
+        # Get credentials
+        email = request.POST.get('email', 'admin@creator-platform.com')
+        password = request.POST.get('password', 'CreatorPlatform2024!')
+        
+        logger.info(f"Testing admin login for: {email}")
+        
+        # Test authentication
+        user = authenticate(username=email, password=password)
+        if not user:
+            logger.error(f"Authentication failed for {email}")
+            return JsonResponse({
+                'error': 'Authentication failed',
+                'email': email,
+                'step': 'authenticate'
+            }, status=401)
+        
+        logger.info(f"Authentication successful for: {email}")
+        
+        # Test admin access
+        if not user.is_staff:
+            logger.error(f"User {email} is not staff")
+            return JsonResponse({
+                'error': 'User is not staff',
+                'email': email,
+                'step': 'staff_check'
+            }, status=403)
+        
+        # Test admin site loading
+        try:
+            admin_models = len(admin.site._registry)
+            logger.info(f"Admin site loaded with {admin_models} models")
+        except Exception as e:
+            logger.error(f"Admin site loading failed: {str(e)}")
+            return JsonResponse({
+                'error': f'Admin site loading failed: {str(e)}',
+                'step': 'admin_site_load'
+            }, status=500)
+        
+        return JsonResponse({
+            'success': True,
+            'email': email,
+            'is_staff': user.is_staff,
+            'is_superuser': user.is_superuser,
+            'admin_models_count': admin_models,
+            'message': 'All admin login steps successful'
+        })
+        
+    except Exception as e:
+        logger.error(f"Admin login test failed: {str(e)}", exc_info=True)
+        return JsonResponse({
+            'error': f'Admin login test failed: {str(e)}',
+            'step': 'general_error'
+        }, status=500)
+
 urlpatterns = [
     path('health/', auth_health, name='auth_health'),
     path('profile/health/', profile_health, name='profile_health'),
@@ -309,5 +377,6 @@ urlpatterns = [
     path('create-admin/', create_admin_user, name='create_admin'),  # Emergency admin creation
     path('verify-admin/', verify_admin_user, name='verify_admin'),  # Admin verification
     path('test-admin-models/', test_admin_models, name='test_admin_models'),  # Admin models test
+    path('test-admin-login/', test_admin_login, name='test_admin_login'),  # Admin login test
     path('subscription/', include('accounts.subscription_urls')),
 ]
