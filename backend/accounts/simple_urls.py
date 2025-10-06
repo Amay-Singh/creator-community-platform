@@ -9,7 +9,7 @@ import json
 from .simple_views import RegisterView, LoginView, ProfileView, dashboard_view
 from .models import CustomUser
 from rest_framework.authtoken.models import Token
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, get_user_model
 
 def auth_health(request):
     """Auth service health check"""
@@ -166,6 +166,48 @@ def simple_login(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
+@csrf_exempt
+@require_http_methods(["POST"])
+def create_admin_user(request):
+    """
+    Emergency endpoint to create admin user
+    Only works if no admin exists
+    """
+    User = get_user_model()
+    
+    # Check if admin already exists
+    if User.objects.filter(is_superuser=True).exists():
+        return JsonResponse({
+            'error': 'Admin user already exists',
+            'admin_url': '/admin/',
+            'message': 'Use existing admin credentials',
+            'username': 'admin',
+            'password': 'CreatorPlatform2024!'
+        }, status=400)
+    
+    try:
+        # Create admin user
+        admin_user = User.objects.create_superuser(
+            username='admin',
+            email='admin@creator-platform.com',
+            password='CreatorPlatform2024!'
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Admin user created successfully',
+            'username': 'admin',
+            'password': 'CreatorPlatform2024!',
+            'admin_url': '/admin/',
+            'login_url': '/admin/login/'
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'error': f'Failed to create admin user: {str(e)}',
+            'message': 'Please check server logs for details'
+        }, status=500)
+
 urlpatterns = [
     path('health/', auth_health, name='auth_health'),
     path('profile/health/', profile_health, name='profile_health'),
@@ -174,5 +216,6 @@ urlpatterns = [
     path('profile/', simple_profile, name='simple_profile'),
     path('profiles/', simple_profiles_create, name='profiles_list'),  # For /api/accounts/profiles/
     path('dashboard/', dashboard_view, name='dashboard'),
+    path('create-admin/', create_admin_user, name='create_admin'),  # Emergency admin creation
     path('subscription/', include('accounts.subscription_urls')),
 ]
