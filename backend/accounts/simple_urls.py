@@ -121,17 +121,27 @@ def simple_profiles_create(request):
 @csrf_exempt
 @require_http_methods(["GET"])
 def simple_profile(request):
-    """Simple profile endpoint"""
-    if not request.user.is_authenticated:
+    """Simple profile endpoint with DRF token authentication"""
+    # Handle DRF Token authentication manually
+    auth_header = request.META.get('HTTP_AUTHORIZATION')
+    if not auth_header or not auth_header.startswith('Token '):
         return JsonResponse({'error': 'Authentication required'}, status=401)
+    
+    token_key = auth_header.split(' ')[1]
+    try:
+        token = Token.objects.get(key=token_key)
+        user = token.user
+    except Token.DoesNotExist:
+        return JsonResponse({'error': 'Invalid token'}, status=401)
     
     return JsonResponse({
         'user': {
-            'id': str(request.user.id),
-            'username': request.user.username,
-            'email': request.user.email
+            'id': str(user.id),
+            'username': user.username,
+            'email': user.email
         },
-        'message': 'Profile endpoint operational'
+        'message': 'Profile endpoint operational',
+        'authenticated': True
     })
 
 @csrf_exempt  
@@ -147,7 +157,7 @@ def simple_login(request):
             return JsonResponse({'error': 'Email and password required'}, status=400)
         
         # Authenticate user
-        user = authenticate(username=email, password=password)
+        user = authenticate(request=request, username=email, password=password)
         if not user:
             return JsonResponse({'error': 'Invalid credentials'}, status=401)
         
@@ -231,7 +241,7 @@ def verify_admin_user(request):
         
         # Test authentication
         from django.contrib.auth import authenticate
-        test_auth = authenticate(username=admin_user.email, password='CreatorPlatform2024!')
+        test_auth = authenticate(request=request, username=admin_user.email, password='CreatorPlatform2024!')
         
         return JsonResponse({
             'status': 'admin_exists',
@@ -319,7 +329,7 @@ def test_admin_login(request):
         logger.info(f"Testing admin login for: {email}")
         
         # Test authentication
-        user = authenticate(username=email, password=password)
+        user = authenticate(request=request, username=email, password=password)
         if not user:
             logger.error(f"Authentication failed for {email}")
             return JsonResponse({
