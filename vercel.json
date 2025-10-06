@@ -1,0 +1,28 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "frontend/package.json",
+      "use": "@vercel/next",
+      "config": {
+        "distDir": "frontend/.next"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/frontend/$1"
+    }
+  ],
+  "git": {
+    "deploymentEnabled": {
+      "main": true,
+      "develop": false,
+      "uat": false
+    }
+  },
+  "github": {
+    "autoAlias": false
+  }
+}

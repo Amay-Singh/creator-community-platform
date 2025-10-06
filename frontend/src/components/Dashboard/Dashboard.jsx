@@ -27,7 +27,7 @@ const Dashboard = () => {
   const loadDashboardData = async () => {
     try {
       // Load notifications, recent activity, etc.
-      const response = await fetch('http://127.0.0.1:8000/api/accounts/dashboard/', {
+      const response = await fetch('https://creator-platform-backend-vfuz.onrender.com/api/accounts/dashboard/', {
         headers: {
           'Authorization': `Token ${localStorage.getItem('token')}`
         },
